@@ -11,7 +11,7 @@ import no.uio.ifi.cless.log.Log;
  */
 public class Error {
     public static void error(String where, String message) {
-	//-- Must be changed in part 0:
+	//TODO
 
 	System.exit(1);
     }
@@ -31,9 +31,9 @@ public class Error {
     }
 
     public static void init() {
-	//-- Must be changed in part 0:
+	//TODO
     }
     public static void finish() {
-	//-- Must be changed in part 0:
+	//TODO
     }
 }

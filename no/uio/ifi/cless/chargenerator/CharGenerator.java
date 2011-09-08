@@ -40,7 +40,7 @@ public class CharGenerator {
     }
 	
     public static boolean isMoreToRead() {
-	//-- Must be changed in part 0:
+	//TODO
 	return false;
     }
 	
@@ -52,6 +52,6 @@ public class CharGenerator {
 	curC = nextC;
 	if (! isMoreToRead()) return;
 
-	//-- Must be changed in part 0:
+	//TODO
     }
 }

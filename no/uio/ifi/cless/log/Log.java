@@ -25,7 +25,7 @@ public class Log {
     }
 	
     public static void finish() {
-	//-- Must be changed in part 0:
+        //TODO
     }
 
     private static void writeLogLine(String data) {
@@ -71,8 +71,7 @@ public class Log {
      */
     public static void noteSourceLine(int lineNum, String line) {
 	if (! doLogParser && ! doLogScanner) return;
-
-	//-- Must be changed in part 0:
+	    String sourceLine = "   " + lineNum + ": " + line;
     }
 	
     /**
@@ -82,8 +81,9 @@ public class Log {
      */
     public static void noteToken() {
 	if (! doLogScanner) return;
-
-	//-- Must be changed in part 0:
+        //Lager en string av nextNextToken og skriver den til logilen
+        String nNToken = Scanner.nextNextToken.toString();
+        writeLogLine("Scanner:  " + nNToken);
     }
 
     public static void noteBinding(String name, int lineNum, int useLineNum) {

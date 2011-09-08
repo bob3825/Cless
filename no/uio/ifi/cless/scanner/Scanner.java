@@ -19,11 +19,11 @@ public class Scanner {
     public static int curLine, nextLine, nextNextLine;
 	
     public static void init() {
-	//-- Must be changed in part 0:
+	//TODO
     }
 	
     public static void finish() {
-	//-- Must be changed in part 0:
+	//TODO
     }
 	
     public static void readNext() {
@@ -38,7 +38,7 @@ public class Scanner {
 
 	    if (! CharGenerator.isMoreToRead()) {
 		nextNextToken = eofToken;
-	    //-- Must be changed in part 0:
+	    //TODO
 	    } else {
 		illegal("Illegal symbol: '" + CharGenerator.curC + "'!");
 	    }
@@ -47,7 +47,7 @@ public class Scanner {
     }
 	
     private static boolean isLetterAZ(char c) {
-	//-- Must be changed in part 0:
+	//TODO
 	return false;
     }
 
