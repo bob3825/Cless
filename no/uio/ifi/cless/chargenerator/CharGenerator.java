@@ -44,8 +44,18 @@ public class CharGenerator {
     }
 
     public static boolean isMoreToRead() {
-        //TODO
-        return false;
+        int currentL = sourceFile.getLineNumber();
+        try {
+            if (sourceFile.readLine() == null) {
+                return true;
+            } else {
+                sourceFile.setLineNumber(currentL);
+                return false;
+            }
+        } catch (IOException e) {
+             Error.error("Could not read source file");
+            return false;
+        }
     }
 
     public static int curLineNum() {
