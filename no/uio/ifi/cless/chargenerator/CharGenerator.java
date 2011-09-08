@@ -44,16 +44,19 @@ public class CharGenerator {
     }
 
     public static boolean isMoreToRead() {
-        int currentL = sourceFile.getLineNumber();
         try {
-            if (sourceFile.readLine() == null) {
+            //Markerer hvor vi startet i filen
+            sourceFile.mark(10);
+            if (sourceFile.read() == -1) {
+                //Returnerer true hvis det er slutt på filen
                 return true;
             } else {
-                sourceFile.setLineNumber(currentL);
+                //Setter tilbake til starten
+                sourceFile.reset();
                 return false;
             }
         } catch (IOException e) {
-             Error.error("Could not read source file");
+            Error.error("Could not read source file");
             return false;
         }
     }
@@ -64,8 +67,16 @@ public class CharGenerator {
 
     public static void readNext() {
         curC = nextC;
-        if (!isMoreToRead()) return;
-
-        //TODO
+        if (!isMoreToRead()) {
+            try {
+                char newChar = (char)sourceFile.read();
+                curC = nextC;
+                nextC = newChar;
+                sourcePos++;
+            }
+            catch (IOException e) {
+                Error.error("Could not read character from sourcefile");
+            }
+        }
     }
 }
