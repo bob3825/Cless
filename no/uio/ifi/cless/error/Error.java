@@ -11,29 +11,30 @@ import no.uio.ifi.cless.log.Log;
  */
 public class Error {
     public static void error(String where, String message) {
-	//TODO
+        //TODO
 
-	System.exit(1);
+        System.exit(1);
     }
-	
+
     public static void error(String message) {
-	error("", message);
+        error("", message);
     }
-	
+
     public static void error(int lineNum, String message) {
-	error((lineNum>0 ? "in line "+lineNum : ""), message);
+        error((lineNum > 0 ? "in line " + lineNum : ""), message);
     }
 
     public static void giveUsage() {
-	System.err.println("Usage: cless [-c] [-log{B|P|S|T}] " +
-			   "[-test{scanner|parser}] file");
-	System.exit(2);
+        System.err.println("Usage: cless [-c] [-log{B|P|S|T}] " +
+                "[-test{scanner|parser}] file");
+        System.exit(2);
     }
 
     public static void init() {
-	//TODO
+        //TODO
     }
+
     public static void finish() {
-	//TODO
+        //TODO
     }
 }
