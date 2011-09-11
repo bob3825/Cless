@@ -52,8 +52,7 @@ public class Scanner {
     }
 
     private static boolean isLetterAZ(char c) {
-        //TODO
-        return false;
+        return (c >= 'A' && c <= 'z');
     }
 
     // Various error reporting methods

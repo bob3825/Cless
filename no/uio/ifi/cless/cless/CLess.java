@@ -22,7 +22,7 @@ import no.uio.ifi.cless.syntax.Syntax;
  * The main program of the C< compiler.
  */
 public class CLess {
-    public static final String version = "2011-07-18";
+    public static final String version = "2011-09-11";
 
     public static String sourceName = null,  // Source file name
             sourceBaseName = null;               // Source file name without extension

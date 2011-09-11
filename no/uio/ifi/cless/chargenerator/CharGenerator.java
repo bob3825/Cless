@@ -70,6 +70,16 @@ public class CharGenerator {
         if (!isMoreToRead()) {
             try {
                 char newChar = (char)sourceFile.read();
+                if(newChar == '#') {
+                    while (newChar != '\n') newChar = (char)sourceFile.read();
+                    readNext();
+                    return;
+                }
+                if(newChar == '\n') {
+                    readNext();
+                    return;
+                }
+                System.out.println(newChar);
                 curC = nextC;
                 nextC = newChar;
                 sourcePos++;
