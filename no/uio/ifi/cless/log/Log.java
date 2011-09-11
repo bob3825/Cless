@@ -73,8 +73,10 @@ public class Log {
      * @param line    The actual line
      */
     public static void noteSourceLine(int lineNum, String line) {
-        if (!doLogParser && !doLogScanner) return;
+        if (!doLogParser && !doLogScanner)
+        System.out.println("NN");
         String sourceLine = "   " + lineNum + ": " + line;
+        writeLogLine(sourceLine);
     }
 
     /**

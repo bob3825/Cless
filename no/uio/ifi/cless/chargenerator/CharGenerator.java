@@ -45,15 +45,16 @@ public class CharGenerator {
 
     public static boolean isMoreToRead() {
         try {
-            //Markerer hvor vi startet i filen
+
             sourceFile.mark(10);
-            if (sourceFile.read() == -1) {
-                //Returnerer true hvis det er slutt på filen
-                return true;
-            } else {
-                //Setter tilbake til starten
-                sourceFile.reset();
+            String line = sourceFile.readLine();
+            //System.out.println(line);
+            if (line == null) {
+                nextLine(false);
                 return false;
+            } else {
+                sourceFile.reset();
+                return true;
             }
         } catch (IOException e) {
             Error.error("Could not read source file");
@@ -67,26 +68,34 @@ public class CharGenerator {
 
     public static void readNext() {
         curC = nextC;
-        if (!isMoreToRead()) {
-            try {
-                char newChar = (char)sourceFile.read();
-                if(newChar == '#') {
-                    while (newChar != '\n') newChar = (char)sourceFile.read();
-                    readNext();
-                    return;
-                }
-                if(newChar == '\n') {
-                    readNext();
-                    return;
-                }
-                System.out.println(newChar);
-                curC = nextC;
-                nextC = newChar;
-                sourcePos++;
+        if (sourceLine.length() == sourcePos) {
+            nextLine(false);
+            readNext();
+            return;
+        }
+        if (isMoreToRead()) {
+
+            char newChar = sourceLine.charAt(sourcePos++);
+            if (newChar == '#') {
+                nextLine(true);
+                readNext();
+                return;
             }
-            catch (IOException e) {
-                Error.error("Could not read character from sourcefile");
+            nextC = newChar;
+            //System.out.println(nextC);
+
+        }
+    }
+
+    public static void nextLine(boolean comment) {
+        try {
+            if (sourceFile.getLineNumber() != 0 && !comment && sourceLine != null) {
+                Log.noteSourceLine(sourceFile.getLineNumber(), sourceLine);
             }
+            sourceLine = sourceFile.readLine();
+            sourcePos = 0;
+        } catch (IOException e) {
+            Error.error("Could not readNextLine");
         }
     }
 }

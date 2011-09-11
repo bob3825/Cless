@@ -42,13 +42,12 @@ public class Scanner {
         nextNextToken = null;
         while (nextNextToken == null) {
             nextNextLine = CharGenerator.curLineNum();
-            String tokenName = "";
-            if (!CharGenerator.isMoreToRead()) {
+            if (CharGenerator.isMoreToRead()) {
                 nextNextToken = isBraceToken(CharGenerator.curC);
                 CharGenerator.readNext();
             } else {
-                illegal("Illegal symbol: '" + CharGenerator.curC + "'!");
                 nextNextToken = eofToken;
+
             }
         }
         Log.noteToken();

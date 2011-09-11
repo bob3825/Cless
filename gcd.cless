@@ -1,4 +1,4 @@
-#LLs
+#LLS
 int LF;
 
 int gcd (int a, int b)
