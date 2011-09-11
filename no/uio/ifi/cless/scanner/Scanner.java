@@ -8,6 +8,8 @@ import no.uio.ifi.cless.chargenerator.CharGenerator;
 import no.uio.ifi.cless.error.Error;
 import no.uio.ifi.cless.log.Log;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 import static no.uio.ifi.cless.scanner.Token.*;
 
 /*
@@ -40,12 +42,13 @@ public class Scanner {
         nextNextToken = null;
         while (nextNextToken == null) {
             nextNextLine = CharGenerator.curLineNum();
-
+            String tokenName = "";
             if (!CharGenerator.isMoreToRead()) {
-                nextNextToken = eofToken;
-                //TODO
+                nextNextToken = isBraceToken(CharGenerator.curC);
+                CharGenerator.readNext();
             } else {
                 illegal("Illegal symbol: '" + CharGenerator.curC + "'!");
+                nextNextToken = eofToken;
             }
         }
         Log.noteToken();
@@ -53,6 +56,23 @@ public class Scanner {
 
     private static boolean isLetterAZ(char c) {
         return (c >= 'A' && c <= 'z');
+    }
+
+    private static Token getTokenType(String token) {
+        return forToken;
+    }
+
+    private static  Token isBraceToken(char c) {
+        switch (c) {
+            case '[': return leftBracketToken;
+            case ']': return rightBracketToken;
+            case '(': return leftParToken;
+            case ')': return rightParToken;
+            case '{': return leftCurlToken;
+            case '}': return rightCurlToken;
+            default: return null;
+        }
+
     }
 
     // Various error reporting methods
