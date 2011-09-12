@@ -39,12 +39,15 @@ public class Scanner {
         curLine = nextLine;
         nextLine = nextNextLine;
 
+
         nextNextToken = null;
         while (nextNextToken == null) {
             nextNextLine = CharGenerator.curLineNum();
             if (CharGenerator.isMoreToRead()) {
-                nextNextToken = isBraceToken(CharGenerator.curC);
+                if(isSingleToken(CharGenerator.curC));
+                else if(isTwoToken(CharGenerator.curC)) CharGenerator.readNext();
                 CharGenerator.readNext();
+
             } else {
                 nextNextToken = eofToken;
 
@@ -61,17 +64,46 @@ public class Scanner {
         return forToken;
     }
 
-    private static  Token isBraceToken(char c) {
+    private static boolean isSingleToken(char c) {
         switch (c) {
-            case '[': return leftBracketToken;
-            case ']': return rightBracketToken;
-            case '(': return leftParToken;
-            case ')': return rightParToken;
-            case '{': return leftCurlToken;
-            case '}': return rightCurlToken;
-            default: return null;
+            case '[': nextNextToken = leftBracketToken; return true;
+            case ']': nextNextToken = rightBracketToken; return true;
+            case '(': nextNextToken = leftParToken; return true;
+            case ')': nextNextToken = rightParToken; return true;
+            case '{': nextNextToken = leftCurlToken; return true;
+            case '}': nextNextToken = rightCurlToken; return true;
+            case '+': nextNextToken = addToken; return true;
+            case '/': nextNextToken = divideToken; return true;
+            case ',': nextNextToken = commaToken; return true;
+            case '*': nextNextToken = multiplyToken; return true;
+            case ';': nextNextToken = semicolonToken; return true;
+            case '-': nextNextToken = subtractToken; return true;
+            default: return false;
         }
 
+    }
+
+    private static boolean isTwoToken(char c) {
+        if(c == '=') {
+            if(CharGenerator.nextC == '=') nextNextToken = equalToken;
+            else nextNextToken = assignToken;
+            return true;
+        }
+        else if(c == '!' && CharGenerator.nextC == '=') {
+            nextNextToken = notEqualToken;
+            CharGenerator.readNext();
+        }
+        else if(c == '<') {
+            if(CharGenerator.nextC == '=') nextNextToken = lessEqualToken;
+            else nextNextToken = lessToken;
+            return true;
+        }
+        else if(c == '>') {
+            if(CharGenerator.nextC == '=') nextNextToken = greaterEqualToken;
+            else nextNextToken = greaterToken;
+            return true;
+        }
+        return false;
     }
 
     // Various error reporting methods

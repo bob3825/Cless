@@ -88,7 +88,7 @@ public class Log {
         if (!doLogScanner) return;
         //Lager en string av nextNextToken og skriver den til logilen
         String nNToken = Scanner.nextNextToken.toString();
-        writeLogLine("Scanner:  " + nNToken);
+        writeLogLine("Scanner :" + nNToken);
     }
 
     public static void noteBinding(String name, int lineNum, int useLineNum) {
