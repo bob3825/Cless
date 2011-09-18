@@ -44,6 +44,7 @@ public class Scanner {
         while (nextNextToken == null) {
             nextNextLine = CharGenerator.curLineNum();
             if (CharGenerator.isMoreToRead()) {
+                if(CharGenerator.curC == '!') System.out.println("!");
                 if(isSingleToken(CharGenerator.curC)) CharGenerator.readNext();
                 else if(isTwoToken(CharGenerator.curC)) CharGenerator.readNext();
                 else if(isNumber(CharGenerator.curC)) {
@@ -83,11 +84,12 @@ public class Scanner {
     private static void isWord(char c) {
         String word = Character.toString(CharGenerator.curC);
         CharGenerator.readNext();
-        while (isLetterAZ(CharGenerator.curC)) {
+        while (isLetterAZ(CharGenerator.curC) || isNumber(CharGenerator.curC)) {
             word = word + Character.toString(CharGenerator.curC);
             CharGenerator.readNext();
         }
         word = word.trim();
+        if(word.compareTo("")==0) return;
         if(word.compareTo("int") == 0) nextNextToken = intToken;
         else if(word.compareTo("if") == 0) nextNextToken = ifToken;
         else if(word.compareTo("else") == 0) nextNextToken = elseToken;
@@ -127,6 +129,7 @@ public class Scanner {
         else if(c == '!' && CharGenerator.nextC == '=') {
             nextNextToken = notEqualToken;
             CharGenerator.readNext();
+            return true;
         }
         else if(c == '<') {
             if(CharGenerator.nextC == '=') nextNextToken = lessEqualToken;

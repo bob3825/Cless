@@ -54,13 +54,13 @@ public class Log {
 
 
     public static void enterParser(String symbol) {
-        if (!doLogParser) return;
+        if (!doLogParser) ;
 
         //-- Must be changed in part 1:
     }
 
     public static void leaveParser(String symbol) {
-        if (!doLogParser) return;
+        if (!doLogParser) ;
 
         //-- Must be changed in part 1:
     }
@@ -88,11 +88,13 @@ public class Log {
         if (!doLogScanner) return;
         //Lager en string av nextNextToken og skriver den til logilen
         String nNToken = Scanner.nextNextToken.toString();
+        if(Scanner.nextNextToken == nameToken) nNToken = nNToken + " :" + Scanner.nextNextName;
+        if(Scanner.nextNextToken == numberToken) nNToken = nNToken + " :" + Scanner.nextNextNum;
         writeLogLine("Scanner :" + nNToken);
     }
 
     public static void noteBinding(String name, int lineNum, int useLineNum) {
-        if (!doLogBinding) return;
+        if (!doLogBinding) ;
         //-- Must be changed in part 2:
     }
 
