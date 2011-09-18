@@ -44,9 +44,22 @@ public class Scanner {
         while (nextNextToken == null) {
             nextNextLine = CharGenerator.curLineNum();
             if (CharGenerator.isMoreToRead()) {
-                if(isSingleToken(CharGenerator.curC));
+                if(isSingleToken(CharGenerator.curC)) CharGenerator.readNext();
                 else if(isTwoToken(CharGenerator.curC)) CharGenerator.readNext();
-                CharGenerator.readNext();
+                else if(isNumber(CharGenerator.curC)) {
+                    String number = Character.toString(CharGenerator.curC);
+                    CharGenerator.readNext();
+                    while (isNumber(CharGenerator.curC)) {
+                        number = number + Character.toString(CharGenerator.curC);
+                        CharGenerator.readNext();
+                    }
+
+                    nextNextToken = numberToken;
+                    nextNextNum = new Integer(number);
+                }
+                else if(CharGenerator.curC != '\n' && CharGenerator.curC != ' ') isWord(CharGenerator.curC);
+                else CharGenerator.readNext();
+
 
             } else {
                 nextNextToken = eofToken;
@@ -59,9 +72,31 @@ public class Scanner {
     private static boolean isLetterAZ(char c) {
         return (c >= 'A' && c <= 'z');
     }
+    private static boolean isNumber(char c) {
+        return (c >= '0' && c <= '9');
+    }
 
     private static Token getTokenType(String token) {
         return forToken;
+    }
+
+    private static void isWord(char c) {
+        String word = Character.toString(CharGenerator.curC);
+        CharGenerator.readNext();
+        while (isLetterAZ(CharGenerator.curC)) {
+            word = word + Character.toString(CharGenerator.curC);
+            CharGenerator.readNext();
+        }
+        word = word.trim();
+        if(word.compareTo("int") == 0) nextNextToken = intToken;
+        else if(word.compareTo("if") == 0) nextNextToken = ifToken;
+        else if(word.compareTo("else") == 0) nextNextToken = elseToken;
+        else if(word.compareTo("while") == 0) nextNextToken = whileToken;
+        else if(word.compareTo("return") == 0) nextNextToken = returnToken;
+        else {
+            nextNextToken = nameToken;
+            nextNextName = word;
+        }
     }
 
     private static boolean isSingleToken(char c) {
