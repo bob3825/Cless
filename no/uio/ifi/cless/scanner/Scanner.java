@@ -44,16 +44,18 @@ public class Scanner {
         while (nextNextToken == null) {
             nextNextLine = CharGenerator.curLineNum();
             if (CharGenerator.isMoreToRead()) {
+                //Checks the different possibilities of what the character can be
                 if(isSingleToken(CharGenerator.curC)) CharGenerator.readNext();
                 else if(isTwoToken(CharGenerator.curC)) CharGenerator.readNext();
                 else if(isNumber(CharGenerator.curC)) {
+                    //Makes a number of all the string until we find a character that i´snt a number
                     String number = Character.toString(CharGenerator.curC);
                     CharGenerator.readNext();
                     while (isNumber(CharGenerator.curC)) {
                         number = number + Character.toString(CharGenerator.curC);
                         CharGenerator.readNext();
                     }
-
+                    //Saves the number and sets nextnexttoken
                     nextNextToken = numberToken;
                     nextNextNum = new Integer(number);
                 }
@@ -99,7 +101,10 @@ public class Scanner {
             nextNextName = word;
         }
     }
-
+    /*
+     *Simple switch to determine if the current character is one of the single character tokens
+     * @param c The character to check
+     */
     private static boolean isSingleToken(char c) {
         switch (c) {
             case '[': nextNextToken = leftBracketToken; return true;
@@ -119,21 +124,30 @@ public class Scanner {
 
     }
 
+    /*
+     *Checks if its a comment and skips characters until it finds the end of the comments
+     */
     private static boolean comment() {
         if (CharGenerator.nextC == '*') {
-
+            //Reads until it finds the end of the comments
             while (CharGenerator.curC != '*' || CharGenerator.nextC != '/') {
                 CharGenerator.readNext();
             }
+            //ReadNext twice to get rid of the two last comments
             CharGenerator.readNext();
             CharGenerator.readNext();
+            //Sets nextnexttoken to null and returns false
+            nextNextToken = null;
             return false;
         }
         else {
             return true;
         }
     }
-
+    /*
+     *Checks if it is one of the two character tokens
+     * @param c the character to check
+     */
     private static boolean isTwoToken(char c) {
         if(c == '=') {
             if(CharGenerator.nextC == '=') {

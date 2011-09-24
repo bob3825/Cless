@@ -45,15 +45,15 @@ public class CharGenerator {
 
     public static boolean isMoreToRead() {
         try {
-            //Markerer hvor vi er i filen
+            //Marks where we are in the file
             sourceFile.mark(10);
             String line = sourceFile.readLine();
-            //Hvis vi linjen er null er vi på slutten av filen
+            //If line is null we are at the end of the file
             if (line == null) {
                 nextLine(false);
                 return false;
             } else {
-                //Setter filen tilbake til der vi markerte hvis den er mer a lese
+                //Resets the file back to where we began
                 sourceFile.reset();
                 return true;
             }
@@ -69,16 +69,16 @@ public class CharGenerator {
 
     public static void readNext() {
         curC = nextC;
-        //Sjekker om vi er ferdig med gjeldende linje
+        //Checks if we are finished with the current line
         if (sourceLine.length() == sourcePos) {
             nextLine(false);
             readNext();
             return;
         }
         if (isMoreToRead()) {
-            //Henter neste char
+            //Gets the next character
             char newChar = sourceLine.charAt(sourcePos++);
-            //Kaster resten av linja som inneholder #
+            //Throws away the rest of the line with #
             if (newChar == '#') {
                 nextLine(true);
                 readNext();
@@ -90,12 +90,12 @@ public class CharGenerator {
 
     public static void nextLine(boolean comment) {
         try {
-            //Sjekker om det er kommentarlinje og om det er siste linje
-            //Hvis det er slik så skriver vi ikke linjen til fil
+            //Checks if it is the last line or a comment line
+            //If not we write the line to the log
             if (sourceFile.getLineNumber() != 0 && !comment && sourceLine != null) {
                 Log.noteSourceLine(sourceFile.getLineNumber(), sourceLine);
             }
-            //Leser neste linje og setter posisjon til starten av den
+            //Reads the next line and sets the position to zero
             sourceLine = sourceFile.readLine();
             sourcePos = 0;
         } catch (IOException e) {

@@ -86,9 +86,9 @@ public class Log {
      */
     public static void noteToken() {
         if (!doLogScanner) return;
-        //Lager en string av nextNextToken og skriver den til logilen
+        //Makes a string of the token and writes it to the logfile
         String nNToken = Scanner.nextNextToken.toString();
-        //Skriver verdien som ble lest inn i tilfelle det er en name eller number token
+        //Writes the value of number or name tokens
         if(Scanner.nextNextToken == nameToken) nNToken = nNToken + " :" + Scanner.nextNextName;
         if(Scanner.nextNextToken == numberToken) nNToken = nNToken + " :" + Scanner.nextNextNum;
         writeLogLine("Scanner :" + nNToken);
