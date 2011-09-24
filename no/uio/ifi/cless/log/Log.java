@@ -88,6 +88,7 @@ public class Log {
         if (!doLogScanner) return;
         //Lager en string av nextNextToken og skriver den til logilen
         String nNToken = Scanner.nextNextToken.toString();
+        //Skriver verdien som ble lest inn i tilfelle det er en name eller number token
         if(Scanner.nextNextToken == nameToken) nNToken = nNToken + " :" + Scanner.nextNextName;
         if(Scanner.nextNextToken == numberToken) nNToken = nNToken + " :" + Scanner.nextNextNum;
         writeLogLine("Scanner :" + nNToken);

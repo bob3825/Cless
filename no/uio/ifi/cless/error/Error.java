@@ -11,7 +11,7 @@ import no.uio.ifi.cless.log.Log;
  */
 public class Error {
     public static void error(String where, String message) {
-        String error = "ERROR in line " + ":\n" + message;
+        String error = "ERROR in line " + where + ":\n" + message;
         Log.noteError(error);
         System.out.println(error);
         System.exit(1);

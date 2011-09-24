@@ -44,7 +44,6 @@ public class Scanner {
         while (nextNextToken == null) {
             nextNextLine = CharGenerator.curLineNum();
             if (CharGenerator.isMoreToRead()) {
-                if(CharGenerator.curC == '!') System.out.println("!");
                 if(isSingleToken(CharGenerator.curC)) CharGenerator.readNext();
                 else if(isTwoToken(CharGenerator.curC)) CharGenerator.readNext();
                 else if(isNumber(CharGenerator.curC)) {
@@ -110,7 +109,7 @@ public class Scanner {
             case '{': nextNextToken = leftCurlToken; return true;
             case '}': nextNextToken = rightCurlToken; return true;
             case '+': nextNextToken = addToken; return true;
-            case '/': nextNextToken = divideToken; return true;
+            case '/': nextNextToken = divideToken; return comment();
             case ',': nextNextToken = commaToken; return true;
             case '*': nextNextToken = multiplyToken; return true;
             case ';': nextNextToken = semicolonToken; return true;
@@ -120,9 +119,27 @@ public class Scanner {
 
     }
 
+    private static boolean comment() {
+        if (CharGenerator.nextC == '*') {
+
+            while (CharGenerator.curC != '*' || CharGenerator.nextC != '/') {
+                CharGenerator.readNext();
+            }
+            CharGenerator.readNext();
+            CharGenerator.readNext();
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
     private static boolean isTwoToken(char c) {
         if(c == '=') {
-            if(CharGenerator.nextC == '=') nextNextToken = equalToken;
+            if(CharGenerator.nextC == '=') {
+                nextNextToken = equalToken;
+                CharGenerator.readNext();
+            }
             else nextNextToken = assignToken;
             return true;
         }
@@ -132,12 +149,18 @@ public class Scanner {
             return true;
         }
         else if(c == '<') {
-            if(CharGenerator.nextC == '=') nextNextToken = lessEqualToken;
+            if(CharGenerator.nextC == '=') {
+                nextNextToken = lessEqualToken;
+                CharGenerator.readNext();
+            }
             else nextNextToken = lessToken;
             return true;
         }
         else if(c == '>') {
-            if(CharGenerator.nextC == '=') nextNextToken = greaterEqualToken;
+            if(CharGenerator.nextC == '=') {
+                nextNextToken = greaterEqualToken;
+                CharGenerator.readNext();
+            }
             else nextNextToken = greaterToken;
             return true;
         }

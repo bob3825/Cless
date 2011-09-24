@@ -45,14 +45,15 @@ public class CharGenerator {
 
     public static boolean isMoreToRead() {
         try {
-
+            //Markerer hvor vi er i filen
             sourceFile.mark(10);
             String line = sourceFile.readLine();
-            //System.out.println(line);
+            //Hvis vi linjen er null er vi på slutten av filen
             if (line == null) {
                 nextLine(false);
                 return false;
             } else {
+                //Setter filen tilbake til der vi markerte hvis den er mer a lese
                 sourceFile.reset();
                 return true;
             }
@@ -68,30 +69,33 @@ public class CharGenerator {
 
     public static void readNext() {
         curC = nextC;
+        //Sjekker om vi er ferdig med gjeldende linje
         if (sourceLine.length() == sourcePos) {
             nextLine(false);
             readNext();
             return;
         }
         if (isMoreToRead()) {
-
+            //Henter neste char
             char newChar = sourceLine.charAt(sourcePos++);
+            //Kaster resten av linja som inneholder #
             if (newChar == '#') {
                 nextLine(true);
                 readNext();
                 return;
             }
             nextC = newChar;
-            //System.out.println(nextC);
-
         }
     }
 
     public static void nextLine(boolean comment) {
         try {
+            //Sjekker om det er kommentarlinje og om det er siste linje
+            //Hvis det er slik så skriver vi ikke linjen til fil
             if (sourceFile.getLineNumber() != 0 && !comment && sourceLine != null) {
                 Log.noteSourceLine(sourceFile.getLineNumber(), sourceLine);
             }
+            //Leser neste linje og setter posisjon til starten av den
             sourceLine = sourceFile.readLine();
             sourcePos = 0;
         } catch (IOException e) {
