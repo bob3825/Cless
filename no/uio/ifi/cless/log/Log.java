@@ -54,15 +54,27 @@ public class Log {
 
 
     public static void enterParser(String symbol) {
-        if (!doLogParser) ;
-
-        //-- Must be changed in part 1:
+        if (doLogParser) {
+            String line = "";
+            for(int i = 0; i < parseLevel;i++) {
+                line = line + "  ";
+            }
+            line = line + symbol;
+            writeLogLine(line);
+            parseLevel++;
+        }
     }
 
     public static void leaveParser(String symbol) {
-        if (!doLogParser) ;
-
-        //-- Must be changed in part 1:
+        if (doLogParser) {
+            parseLevel--;
+            String line = "";
+            for(int i = 0; i < parseLevel;i++) {
+                line = line + "  ";
+            }
+            line = line + symbol;
+            writeLogLine(line);
+        }
     }
 
     /**
@@ -118,10 +130,10 @@ public class Log {
     }
 
     public static void indentTree() {
-        //-- Must be changed in part 1:
+        treeLevel++;
     }
 
     public static void outdentTree() {
-        //-- Must be changed in part 1:
+        treeLevel--;
     }
 }

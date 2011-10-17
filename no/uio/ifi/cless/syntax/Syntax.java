@@ -22,7 +22,9 @@ public class Syntax {
     static Program program;
 
     public static void init() {
-        //-- Must be changed in part 1:
+        Scanner.readNext();
+        Scanner.readNext();
+        Scanner.readNext();
     }
 
     public static void finish() {
@@ -101,7 +103,6 @@ class Program extends SyntaxUnit {
     @Override
     void parse() {
         Log.enterParser("<program>");
-
         progDecls.parse();
         if (Scanner.curToken != eofToken)
             Scanner.expected("Declaration");
@@ -185,14 +186,20 @@ class GlobalDeclList extends DeclList {
                     FuncDecl fd = new FuncDecl(Scanner.nextName);
                     fd.parse();
                     addDecl(fd);
-                } else if (Scanner.nextNextToken == leftBracketToken) {
+                }
+                else if (Scanner.nextNextToken == leftBracketToken) {
                     GlobalArrayDecl gad = new GlobalArrayDecl(Scanner.nextName);
                     gad.parse();
                     addDecl(gad);
-                } else {
-                    //-- Must be changed in part 1:
                 }
-            } else {
+                else {
+                    GlobalSimpleVarDecl var = new GlobalSimpleVarDecl(Scanner.nextName);
+                    var.parse();
+                    addDecl(var);
+                }
+            }
+            else
+            {
                 Scanner.expected("Declaration");
             }
         }
@@ -410,7 +417,9 @@ class GlobalSimpleVarDecl extends VarDecl {
     @Override
     void parse() {
         Log.enterParser("<var decl>");
-
+        Scanner.readNext();
+        Scanner.skip(nameToken);
+        Scanner.skip(semicolonToken);
         //-- Must be changed in part 1:
 
         Log.leaveParser("</var decl>");
@@ -544,7 +553,7 @@ class ParamDecl extends VarDecl {
     void parse() {
         Log.enterParser("<param decl>");
 
-        //-- Must be changed in part 1:
+
 
         Log.leaveParser("</param decl>");
     }

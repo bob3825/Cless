@@ -71,7 +71,6 @@ public class CharGenerator {
             }
             nextC = newChar;
         }
-        System.out.println(nextC);
     }
 
     public static void nextLine(boolean comment) {
