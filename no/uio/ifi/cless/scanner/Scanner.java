@@ -20,6 +20,7 @@ public class Scanner {
     public static String curName, nextName, nextNextName;
     public static int curNum, nextNum, nextNextNum;
     public static int curLine, nextLine, nextNextLine;
+    public static int lastTwo = 0;
 
     public static void init() {
         //TODO
@@ -43,7 +44,8 @@ public class Scanner {
         nextNextToken = null;
         while (nextNextToken == null) {
             nextNextLine = CharGenerator.curLineNum();
-            if (CharGenerator.isMoreToRead()) {
+            if(!CharGenerator.isMoreToRead()) lastTwo++;
+            if (lastTwo < 2) {
                 //Checks the different possibilities of what the character can be
                 if(isSingleToken(CharGenerator.curC)) CharGenerator.readNext();
                 else if(isTwoToken(CharGenerator.curC)) CharGenerator.readNext();
@@ -58,6 +60,13 @@ public class Scanner {
                     //Saves the number and sets nextnexttoken
                     nextNextToken = numberToken;
                     nextNextNum = new Integer(number);
+                }
+                else if (CharGenerator.curC == '\'') {
+                    CharGenerator.readNext();
+                    nextNextToken = numberToken;
+                    nextNextNum = (int)CharGenerator.curC;
+                    CharGenerator.readNext();
+                    CharGenerator.readNext();
                 }
                 else if(CharGenerator.curC != '\n' && CharGenerator.curC != ' ') isWord(CharGenerator.curC);
                 else CharGenerator.readNext();
