@@ -81,7 +81,7 @@ public class Scanner {
     }
 
     private static boolean isLetterAZ(char c) {
-        return (c >= 'A' && c <= 'z');
+        return ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'));
     }
     private static boolean isNumber(char c) {
         return (c >= '0' && c <= '9');

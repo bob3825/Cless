@@ -143,11 +143,24 @@ abstract class DeclList extends SyntaxUnit {
 
     @Override
     void printTree() {
-        //-- Must be changed in part 1:
+        Declaration curDecl = firstDecl;
+        while(curDecl != null) {
+            curDecl.printTree();
+            curDecl = curDecl.nextDecl;
+        }
     }
 
     void addDecl(Declaration d) {
-        //-- Must be changed in part 1:
+        if(firstDecl == null) {
+            firstDecl = d;
+        }
+        else {
+            Declaration curDecl = firstDecl;
+            while (curDecl.nextDecl != null) {
+                curDecl = curDecl.nextDecl;
+            }
+            curDecl.nextDecl = d;
+        }
     }
 
     int dataSize() {
@@ -372,8 +385,13 @@ class GlobalArrayDecl extends VarDecl {
     @Override
     void parse() {
         Log.enterParser("<var decl>");
-
-        //-- Must be changed in part 1:
+        Scanner.readNext();
+        Scanner.skip(nameToken);
+        Scanner.skip(leftBracketToken);
+        numElems = Scanner.curNum;
+        Scanner.skip(numberToken);
+        Scanner.skip(rightBracketToken);
+        Scanner.skip(semicolonToken);
 
         Log.leaveParser("</var decl>");
     }
