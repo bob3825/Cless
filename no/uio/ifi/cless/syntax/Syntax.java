@@ -28,7 +28,7 @@ public class Syntax {
     }
 
     public static void finish() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 
     static void error(SyntaxUnit use, String message) {
@@ -127,7 +127,7 @@ abstract class DeclList extends SyntaxUnit {
     DeclList outerScope;
 
     DeclList() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 
     @Override
@@ -232,7 +232,7 @@ class LocalDeclList extends DeclList {
 
     @Override
     void parse() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 }
 
@@ -249,7 +249,7 @@ class ParamDeclList extends DeclList {
 
     @Override
     void parse() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 }
 
@@ -340,7 +340,7 @@ abstract class VarDecl extends Declaration {
         Log.wTreeLn(";");
     }
 
-    //-- Must be changed in part 1+2:
+    //TODO+2:
 }
 
 
@@ -392,13 +392,12 @@ class GlobalArrayDecl extends VarDecl {
         Scanner.skip(numberToken);
         Scanner.skip(rightBracketToken);
         Scanner.skip(semicolonToken);
-
         Log.leaveParser("</var decl>");
     }
 
     @Override
     void printTree() {
-        //-- Must be changed in part 1:
+        Log.wTreeLn("int " + name + "[" + numElems +"];");
     }
 }
 
@@ -438,8 +437,6 @@ class GlobalSimpleVarDecl extends VarDecl {
         Scanner.readNext();
         Scanner.skip(nameToken);
         Scanner.skip(semicolonToken);
-        //-- Must be changed in part 1:
-
         Log.leaveParser("</var decl>");
     }
 }
@@ -484,15 +481,19 @@ class LocalArrayDecl extends VarDecl {
     @Override
     void parse() {
         Log.enterParser("<var decl>");
-
-        //-- Must be changed in part 1:
-
+        Scanner.readNext();
+        Scanner.skip(nameToken);
+        Scanner.skip(leftBracketToken);
+        numElems = Scanner.curNum;
+        Scanner.skip(numberToken);
+        Scanner.skip(rightBracketToken);
+        Scanner.skip(semicolonToken);
         Log.leaveParser("</var decl>");
     }
 
     @Override
     void printTree() {
-        //-- Must be changed in part 1:
+        Log.wTreeLn("int " + name + "[" + numElems +"];");
     }
 
 }
@@ -529,9 +530,9 @@ class LocalSimpleVarDecl extends VarDecl {
     @Override
     void parse() {
         Log.enterParser("<var decl>");
-
-        //-- Must be changed in part 1:
-
+        Scanner.readNext();
+        Scanner.skip(nameToken);
+        Scanner.skip(semicolonToken);
         Log.leaveParser("</var decl>");
     }
 }
@@ -582,14 +583,14 @@ class ParamDecl extends VarDecl {
  * A <func decl>
  */
 class FuncDecl extends Declaration {
-    //-- Must be changed in part 1+2:
+    //TODO+2:
 
     FuncDecl(String n) {
         // Used for user functions:
 
         super(n);
         assemblerName = (CLess.underscoredGlobals() ? "_" : "") + n;
-        //-- Must be changed in part 1:
+        //TODO:
     }
 
     @Override
@@ -627,12 +628,12 @@ class FuncDecl extends Declaration {
 
     @Override
     void parse() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 
     @Override
     void printTree() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 }
 
@@ -641,7 +642,7 @@ class FuncDecl extends Declaration {
  * A <statm list>.
  */
 class StatmList extends SyntaxUnit {
-    //-- Must be changed in part 1:
+    //TODO:
 
     @Override
     void check(DeclList curDecls) {
@@ -660,7 +661,7 @@ class StatmList extends SyntaxUnit {
         Statement lastStatm = null;
         while (Scanner.curToken != rightCurlToken) {
             Log.enterParser("<statement>");
-            //-- Must be changed in part 1:
+            //TODO:
             Log.leaveParser("</statement>");
         }
 
@@ -669,7 +670,7 @@ class StatmList extends SyntaxUnit {
 
     @Override
     void printTree() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 }
 
@@ -683,15 +684,15 @@ abstract class Statement extends SyntaxUnit {
     static Statement makeNewStatement() {
         if (Scanner.curToken == nameToken &&
                 Scanner.nextToken == leftParToken) {
-            //-- Must be changed in part 1:
+            //TODO:
         } else if (Scanner.curToken == nameToken) {
-            //-- Must be changed in part 1:
+            //TODO:
         } else if (Scanner.curToken == forToken) {
-            //-- Must be changed in part 1:
+            //TODO:
         } else if (Scanner.curToken == ifToken) {
             return new IfStatm();
         } else if (Scanner.curToken == returnToken) {
-            //-- Must be changed in part 1:
+            //TODO:
         } else if (Scanner.curToken == whileToken) {
             return new WhileStatm();
         } else if (Scanner.curToken == semicolonToken) {
@@ -708,7 +709,7 @@ abstract class Statement extends SyntaxUnit {
 * An <empty statm>.
 */
 class EmptyStatm extends Statement {
-    //-- Must be changed in part 1+2:
+    //TODO+2:
 
     @Override
     void check(DeclList curDecls) {
@@ -722,12 +723,12 @@ class EmptyStatm extends Statement {
 
     @Override
     void parse() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 
     @Override
     void printTree() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 }
 
@@ -735,13 +736,13 @@ class EmptyStatm extends Statement {
 /*
 * A <for-statm>.
 */
-//-- Must be changed in part 1+2:
+//TODO+2:
 
 /*
  * An <if-statm>.
  */
 class IfStatm extends Statement {
-    //-- Must be changed in part 1+2:
+    //TODO+2:
 
     @Override
     void check(DeclList curDecls) {
@@ -755,12 +756,12 @@ class IfStatm extends Statement {
 
     @Override
     void parse() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 
     @Override
     void printTree() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 }
 
@@ -768,7 +769,7 @@ class IfStatm extends Statement {
 /*
  * A <return-statm>.
  */
-//-- Must be changed in part 1+2:
+//TODO+2:
 
 
 /*
@@ -826,7 +827,7 @@ class WhileStatm extends Statement {
 }
 
 
-//-- Must be changed in part 1+2:
+//TODO+2:
 
 
 /*
@@ -852,19 +853,19 @@ class ExprList extends SyntaxUnit {
 
         Log.enterParser("<expr list>");
 
-        //-- Must be changed in part 1:
+        //TODO:
 
         Log.leaveParser("</expr list>");
     }
 
     @Override
     void printTree() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 
     int nExprs() {
         int n = 0;
-        //-- Must be changed in part 1:
+        //TODO:
         return n;
     }
 }
@@ -891,14 +892,14 @@ class Expression extends Operand {
     void parse() {
         Log.enterParser("<expression>");
 
-        //-- Must be changed in part 1:
+        //TODO:
 
         Log.leaveParser("</expression>");
     }
 
     @Override
     void printTree() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 }
 
@@ -908,11 +909,11 @@ class Expression extends Operand {
  */
 abstract class Operator extends SyntaxUnit {
     Operand secondOp;
-    //-- Must be changed in part 1+2:
+    //TODO+2:
 }
 
 
-//-- Must be changed in part 1+2:
+//TODO+2:
 
 
 /*
@@ -927,7 +928,7 @@ abstract class Operand extends SyntaxUnit {
  * A <function call>.
  */
 class FunctionCall extends Operand {
-    //-- Must be changed in part 1+2:
+    //TODO+2:
 
     @Override
     void check(DeclList curDecls) {
@@ -943,15 +944,15 @@ class FunctionCall extends Operand {
 
     @Override
     void parse() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 
     @Override
     void printTree() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 
-    //-- Must be changed in part 1+2:
+    //TODO+2:
 }
 
 
@@ -974,7 +975,7 @@ class Number extends Operand {
 
     @Override
     void parse() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 
     @Override
@@ -1015,11 +1016,11 @@ class Variable extends Operand {
     @Override
     void parse() {
         Log.enterParser("<variable>");
-        //-- Must be changed in part 1:
+        //TODO:
     }
 
     @Override
     void printTree() {
-        //-- Must be changed in part 1:
+        //TODO:
     }
 }
