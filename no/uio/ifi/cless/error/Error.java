@@ -32,10 +32,10 @@ public class Error {
     }
 
     public static void init() {
-        //TODO
+        //No use found yet
     }
 
     public static void finish() {
-        //TODO
+        //No use found yet
     }
 }

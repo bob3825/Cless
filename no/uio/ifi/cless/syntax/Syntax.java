@@ -249,7 +249,27 @@ class ParamDeclList extends DeclList {
 
     @Override
     void parse() {
-        //TODO:
+        while(Scanner.curToken != rightParToken) {
+            ParamDecl p = new ParamDecl(Scanner.nextName);
+            p.parse();
+            addDecl(p);
+            if(Scanner.curToken == commaToken) {
+                Scanner.skip(commaToken);
+            }
+            else break;
+        }
+    }
+
+    @Override
+    void printTree() {
+        Declaration curParam = firstDecl;
+        while(curParam != null) {
+            curParam.printTree();
+            if(curParam.nextDecl != null) {
+                Log.wTree(", ");
+            }
+            curParam = curParam.nextDecl;
+        }
     }
 }
 
@@ -571,10 +591,13 @@ class ParamDecl extends VarDecl {
     @Override
     void parse() {
         Log.enterParser("<param decl>");
-
-
-
+        Scanner.skip(intToken);
+        Scanner.skip(nameToken);
         Log.leaveParser("</param decl>");
+    }
+    @Override
+    void printTree() {
+        Log.wTree("int " + name);
     }
 }
 
@@ -583,13 +606,17 @@ class ParamDecl extends VarDecl {
  * A <func decl>
  */
 class FuncDecl extends Declaration {
-    //TODO+2:
+    //-- Must be changed in part 2
+    ParamDeclList parameters;
+    LocalDeclList localVariables;
+    StatmList funcBody;
 
     FuncDecl(String n) {
         // Used for user functions:
 
         super(n);
         assemblerName = (CLess.underscoredGlobals() ? "_" : "") + n;
+        parameters = new ParamDeclList();
         //TODO:
     }
 
@@ -628,14 +655,31 @@ class FuncDecl extends Declaration {
 
     @Override
     void parse() {
-        //TODO:
+        Scanner.readNext();
+        Scanner.skip(nameToken);
+        Scanner.skip(leftParToken);
+        parameters.parse();
+        Scanner.skip(rightParToken);
+        Scanner.skip(leftCurlToken);
+        //TODO Funcbody and Local Variables
+        Scanner.skip(rightCurlToken);
     }
 
     @Override
     void printTree() {
-        //TODO:
+        Log.wTree("int " + name + "(");
+        parameters.printTree();
+        Log.wTreeLn(")");
+        Log.wTreeLn("{");
+        Log.indentTree();
+        //TODO funcbody and variables
+        Log.outdentTree();
+        Log.wTreeLn("}");
+
     }
 }
+
+
 
 
 /*

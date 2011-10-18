@@ -27,7 +27,7 @@ public class Log {
     }
 
     public static void finish() {
-        //TODO
+        //No use found yet
     }
 
     private static void writeLogLine(String data) {

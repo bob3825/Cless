@@ -23,11 +23,11 @@ public class Scanner {
     public static int lastTwo = 0;
 
     public static void init() {
-        //TODO
+        //No use found yet
     }
 
     public static void finish() {
-        //TODO
+        //No use found yet
     }
 
     public static void readNext() {
