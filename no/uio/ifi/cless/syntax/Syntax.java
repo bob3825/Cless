@@ -232,7 +232,11 @@ class LocalDeclList extends DeclList {
 
     @Override
     void parse() {
-        //TODO:
+        while(Scanner.curToken == intToken) {
+            LocalSimpleVarDecl var = new LocalSimpleVarDecl(Scanner.nextName);
+            var.parse();
+            addDecl(var);
+        }
     }
 }
 
@@ -360,7 +364,7 @@ abstract class VarDecl extends Declaration {
         Log.wTreeLn(";");
     }
 
-    //TODO+2:
+    //Part 1 + 2:
 }
 
 
@@ -617,7 +621,8 @@ class FuncDecl extends Declaration {
         super(n);
         assemblerName = (CLess.underscoredGlobals() ? "_" : "") + n;
         parameters = new ParamDeclList();
-        //TODO:
+        localVariables = new LocalDeclList();
+        funcBody = new StatmList();
     }
 
     @Override
@@ -661,7 +666,8 @@ class FuncDecl extends Declaration {
         parameters.parse();
         Scanner.skip(rightParToken);
         Scanner.skip(leftCurlToken);
-        //TODO Funcbody and Local Variables
+        localVariables.parse();
+        funcBody.parse();
         Scanner.skip(rightCurlToken);
     }
 
@@ -672,7 +678,8 @@ class FuncDecl extends Declaration {
         Log.wTreeLn(")");
         Log.wTreeLn("{");
         Log.indentTree();
-        //TODO funcbody and variables
+        localVariables.printTree();
+        funcBody.printTree();
         Log.outdentTree();
         Log.wTreeLn("}");
 
@@ -686,7 +693,7 @@ class FuncDecl extends Declaration {
  * A <statm list>.
  */
 class StatmList extends SyntaxUnit {
-    //TODO:
+    Statement firstStatm;
 
     @Override
     void check(DeclList curDecls) {
@@ -705,7 +712,9 @@ class StatmList extends SyntaxUnit {
         Statement lastStatm = null;
         while (Scanner.curToken != rightCurlToken) {
             Log.enterParser("<statement>");
-            //TODO:
+            Statement newStatm = Statement.makeNewStatement();
+            addStatm(newStatm);
+            lastStatm = newStatm;
             Log.leaveParser("</statement>");
         }
 
@@ -714,7 +723,22 @@ class StatmList extends SyntaxUnit {
 
     @Override
     void printTree() {
-        //TODO:
+        Log.wTreeLn("");
+        Statement curStatm = firstStatm;
+        while(curStatm != null) {
+            curStatm.printTree();
+            curStatm = curStatm.nextStatm;
+        }
+    }
+
+    void addStatm(Statement statm) {
+        Statement curStatm = firstStatm;
+        if(curStatm == null){
+            firstStatm = statm;
+            return;
+        }
+        while(curStatm.nextStatm != null) curStatm = curStatm.nextStatm;
+        curStatm.nextStatm = statm;
     }
 }
 
@@ -740,7 +764,9 @@ abstract class Statement extends SyntaxUnit {
         } else if (Scanner.curToken == whileToken) {
             return new WhileStatm();
         } else if (Scanner.curToken == semicolonToken) {
-            return new EmptyStatm();
+            EmptyStatm empty = new EmptyStatm();
+            empty.parse();
+            return empty;
         } else {
             Scanner.expected("Statement");
         }
@@ -753,7 +779,7 @@ abstract class Statement extends SyntaxUnit {
 * An <empty statm>.
 */
 class EmptyStatm extends Statement {
-    //TODO+2:
+    //Part 1 + 2:
 
     @Override
     void check(DeclList curDecls) {
@@ -767,12 +793,12 @@ class EmptyStatm extends Statement {
 
     @Override
     void parse() {
-        //TODO:
+        Scanner.skip(semicolonToken);
     }
 
     @Override
     void printTree() {
-        //TODO:
+        Log.wTreeLn(";");
     }
 }
 
@@ -780,13 +806,13 @@ class EmptyStatm extends Statement {
 /*
 * A <for-statm>.
 */
-//TODO+2:
+//Part 1 + 2:
 
 /*
  * An <if-statm>.
  */
 class IfStatm extends Statement {
-    //TODO+2:
+    //Part 1 + 2:
 
     @Override
     void check(DeclList curDecls) {
@@ -813,7 +839,7 @@ class IfStatm extends Statement {
 /*
  * A <return-statm>.
  */
-//TODO+2:
+//Part 1 + 2:
 
 
 /*
@@ -871,7 +897,7 @@ class WhileStatm extends Statement {
 }
 
 
-//TODO+2:
+//Part 1 + 2:
 
 
 /*
@@ -953,11 +979,11 @@ class Expression extends Operand {
  */
 abstract class Operator extends SyntaxUnit {
     Operand secondOp;
-    //TODO+2:
+    //Part 1 + 2:
 }
 
 
-//TODO+2:
+//Part 1 + 2:
 
 
 /*
@@ -972,7 +998,7 @@ abstract class Operand extends SyntaxUnit {
  * A <function call>.
  */
 class FunctionCall extends Operand {
-    //TODO+2:
+    //Part 1 + 2:
 
     @Override
     void check(DeclList curDecls) {
@@ -996,7 +1022,7 @@ class FunctionCall extends Operand {
         //TODO:
     }
 
-    //TODO+2:
+    //Part 1 + 2:
 }
 
 
