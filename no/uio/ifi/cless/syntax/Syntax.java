@@ -715,8 +715,6 @@ class StatmList extends SyntaxUnit {
         Statement lastStatm = null;
         while (Scanner.curToken != rightCurlToken) {
             Log.enterParser("<statement>");
-            System.out.println(Scanner.curToken);
-            System.out.println(Scanner.curName);
             Statement newStatm = Statement.makeNewStatement();
             addStatm(newStatm);
             lastStatm = newStatm;
