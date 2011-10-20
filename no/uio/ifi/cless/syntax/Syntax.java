@@ -4,12 +4,15 @@ package no.uio.ifi.cless.syntax;
  * module Syntax
  */
 
+import com.sun.java.swing.plaf.nimbus.State;
 import no.uio.ifi.cless.cless.CLess;
 import no.uio.ifi.cless.code.Code;
 import no.uio.ifi.cless.error.Error;
 import no.uio.ifi.cless.log.Log;
 import no.uio.ifi.cless.scanner.Scanner;
 import no.uio.ifi.cless.scanner.Token;
+
+import java.sql.SQLOutput;
 
 import static no.uio.ifi.cless.scanner.Token.*;
 
@@ -28,7 +31,7 @@ public class Syntax {
     }
 
     public static void finish() {
-        //TODO:
+        //Havent found a use yet.
     }
 
     static void error(SyntaxUnit use, String message) {
@@ -127,7 +130,7 @@ abstract class DeclList extends SyntaxUnit {
     DeclList outerScope;
 
     DeclList() {
-        //TODO:
+        //No use found yet
     }
 
     @Override
@@ -712,6 +715,8 @@ class StatmList extends SyntaxUnit {
         Statement lastStatm = null;
         while (Scanner.curToken != rightCurlToken) {
             Log.enterParser("<statement>");
+            System.out.println(Scanner.curToken);
+            System.out.println(Scanner.curName);
             Statement newStatm = Statement.makeNewStatement();
             addStatm(newStatm);
             lastStatm = newStatm;
@@ -752,17 +757,29 @@ abstract class Statement extends SyntaxUnit {
     static Statement makeNewStatement() {
         if (Scanner.curToken == nameToken &&
                 Scanner.nextToken == leftParToken) {
-            //TODO:
+            CallStatm call = new CallStatm(Scanner.curName);
+            call.parse();
+            return call;
         } else if (Scanner.curToken == nameToken) {
-            //TODO:
+            AssignStatm assStatm = new AssignStatm(Scanner.curName);
+            assStatm.parse();
+            return assStatm;
         } else if (Scanner.curToken == forToken) {
-            //TODO:
+            ForStatm forey = new ForStatm();
+            forey.parse();
+            return forey;
         } else if (Scanner.curToken == ifToken) {
-            return new IfStatm();
+            IfStatm ifey = new IfStatm();
+            ifey.parse();
+            return ifey;
         } else if (Scanner.curToken == returnToken) {
-            //TODO:
+           ReturnStatm returney = new ReturnStatm();
+            returney.parse();
+            return returney;
         } else if (Scanner.curToken == whileToken) {
-            return new WhileStatm();
+            WhileStatm whiley = new WhileStatm();
+            whiley.parse();
+            return whiley;
         } else if (Scanner.curToken == semicolonToken) {
             EmptyStatm empty = new EmptyStatm();
             empty.parse();
@@ -771,6 +788,35 @@ abstract class Statement extends SyntaxUnit {
             Scanner.expected("Statement");
         }
         return null;  // Just to keep the Java compiler happy. :-)
+    }
+}
+
+class CallStatm extends Statement {
+    FunctionCall call;
+
+    CallStatm(String name) {
+        call = new FunctionCall(name);
+    }
+    @Override
+    void check(DeclList curDecls) {
+        //Part 2, i guess
+    }
+
+    @Override
+    void genCode(FuncDecl curFunc) {
+        //Part 2, i guess
+    }
+
+    @Override
+    void parse() {
+        call.parse();
+        Scanner.skip(semicolonToken);
+    }
+
+    @Override
+    void printTree() {
+        call.printTree();
+        Log.wTreeLn(";");
     }
 }
 
@@ -808,11 +854,69 @@ class EmptyStatm extends Statement {
 */
 //Part 1 + 2:
 
+class ForStatm extends Statement {
+    ForAssignStatm start;
+    Expression test;
+    ForAssignStatm step;
+    StatmList body;
+
+    @Override
+    void check(DeclList curDecls) {
+        //Part 2, i guess
+    }
+
+    @Override
+    void genCode(FuncDecl curFunc) {
+        //Part 2, i guess
+    }
+
+    @Override
+    void parse() {
+        Scanner.skip(forToken);
+        Scanner.skip(leftParToken);
+        start = new ForAssignStatm(Scanner.curName);
+        start.parse();
+        System.out.println("1");
+        Scanner.skip(semicolonToken);
+        test = new Expression();
+        test.parse();
+        System.out.println("2");
+        Scanner.skip(semicolonToken);
+        step = new ForAssignStatm(Scanner.curName);
+        step.parse();
+        Scanner.skip(rightParToken);
+        Scanner.skip(leftCurlToken);
+        body = new StatmList();
+        body.parse();
+        Scanner.skip(rightCurlToken);
+    }
+
+    @Override
+    void printTree() {
+        Log.wTree("for (");
+        start.printTree();
+        Log.wTree(";");
+        test.printTree();
+        Log.wTree(";");
+        step.printTree();
+        Log.wTreeLn(") {");
+        body.printTree();
+        Log.wTreeLn("}");
+    }
+}
 /*
  * An <if-statm>.
  */
 class IfStatm extends Statement {
+    Expression test;
+    StatmList ifpart;
+    StatmList elsepart = null;
     //Part 1 + 2:
+
+    IfStatm() {
+        test = new Expression();
+        ifpart = new StatmList();
+    }
 
     @Override
     void check(DeclList curDecls) {
@@ -826,12 +930,35 @@ class IfStatm extends Statement {
 
     @Override
     void parse() {
-        //TODO:
+        Scanner.skip(ifToken);
+        Scanner.skip(leftParToken);
+        test.parse();
+        Scanner.skip(rightParToken);
+        Scanner.skip(leftCurlToken);
+        ifpart.parse();
+        Scanner.skip(rightCurlToken);
+        if(Scanner.curToken == elseToken) {
+            elsepart = new StatmList();
+            Scanner.skip(elseToken);
+            Scanner.skip(leftCurlToken);
+            elsepart.parse();
+            Scanner.skip(rightCurlToken);
+        }
     }
 
     @Override
     void printTree() {
-        //TODO:
+        Log.wTree("if(");
+        test.printTree();
+        Log.wTree(") {");
+        ifpart.printTree();
+        Log.wTreeLn();
+        Log.wTreeLn("}");
+        if(elsepart != null) {
+            Log.wTree("else {");
+            elsepart.printTree();
+            Log.wTreeLn("}");
+        }
     }
 }
 
@@ -840,6 +967,36 @@ class IfStatm extends Statement {
  * A <return-statm>.
  */
 //Part 1 + 2:
+class ReturnStatm extends Statement {
+    Expression returnExpression;
+
+    ReturnStatm() {
+        returnExpression = new Expression();
+    }
+    @Override
+    void check(DeclList curDecls) {
+        //Part 2, i guess
+    }
+
+    @Override
+    void genCode(FuncDecl curFunc) {
+        //Part 2, i guess
+    }
+
+    @Override
+    void parse() {
+        Scanner.skip(returnToken);
+        returnExpression.parse();
+        Scanner.skip(semicolonToken);
+    }
+
+    @Override
+    void printTree() {
+        Log.wTree("return ");
+        returnExpression.printTree();
+        Log.wTreeLn(";");
+    }
+}
 
 
 /*
@@ -897,7 +1054,60 @@ class WhileStatm extends Statement {
 }
 
 
-//Part 1 + 2:
+class AssignStatm extends Statement {
+    Variable var;
+    Expression value;
+
+    AssignStatm(String name) {
+        var = new Variable(name);
+        value = new Expression();
+    }
+    @Override
+    void check(DeclList curDecls) {
+        //Part 2, i guess
+    }
+
+    @Override
+    void genCode(FuncDecl curFunc) {
+        //Part 2, i guess
+    }
+
+    @Override
+    void parse() {
+        var.parse();
+        Scanner.skip(assignToken);
+        value.parse();
+        Scanner.skip(semicolonToken);
+    }
+
+    @Override
+    void printTree() {
+        var.printTree();
+        Log.wTree("=");
+        value.printTree();
+        Log.wTreeLn(";");
+    }
+}
+
+class ForAssignStatm extends AssignStatm {
+    @Override
+    void parse() {
+        var.parse();
+        Scanner.skip(assignToken);
+        value.parse();
+    }
+
+    @Override
+    void printTree() {
+        var.printTree();
+        Log.wTree("=");
+        value.printTree();
+    }
+
+    ForAssignStatm(String name) {
+        super(name);
+    }
+}
 
 
 /*
@@ -923,20 +1133,45 @@ class ExprList extends SyntaxUnit {
 
         Log.enterParser("<expr list>");
 
-        //TODO:
+        while (Scanner.curToken != rightParToken) {
+            Expression curExpr = new Expression();
+            curExpr.parse();
+            addExpression(curExpr);
+            if(Scanner.curToken != rightParToken) Scanner.skip(commaToken);
+        }
 
         Log.leaveParser("</expr list>");
     }
 
     @Override
     void printTree() {
-        //TODO:
+        Expression curExpr = firstExpr;
+        while (curExpr != null) {
+            curExpr.printTree();
+            if(curExpr.nextExpr != null) Log.wTree(", ");
+            curExpr = curExpr.nextExpr;
+        }
     }
 
     int nExprs() {
         int n = 0;
-        //TODO:
+        Expression curExpr = firstExpr;
+        while(curExpr != null) {
+            n++;
+            curExpr = curExpr.nextExpr;
+        }
         return n;
+    }
+
+    void addExpression(Expression e) {
+        if(firstExpr == null) {
+            firstExpr = e;
+            return;
+        }
+        Expression curExpr = firstExpr;
+        while (curExpr.nextExpr != null) curExpr = curExpr.nextExpr;
+        curExpr.nextExpr = e;
+
     }
 }
 
@@ -962,14 +1197,38 @@ class Expression extends Operand {
     void parse() {
         Log.enterParser("<expression>");
 
-        //TODO:
+        firstOp = Operand.makeNewOperand();
+        firstOp.parse();
+
+
 
         Log.leaveParser("</expression>");
     }
 
     @Override
     void printTree() {
-        //TODO:
+        //Log.wTree("(");
+        firstOp.printTree();
+        //Log.wTree(")");
+    }
+}
+
+class InternalExpression extends Expression {
+    @Override
+    void parse() {
+        Scanner.skip(leftParToken);
+        Log.enterParser("<expression>");
+        firstOp = Operand.makeNewOperand();
+        firstOp.parse();
+        Log.leaveParser("</expression>");
+        Scanner.skip(rightParToken);
+    }
+
+    @Override
+    void printTree() {
+        Log.wTree("(");
+        firstOp.printTree();
+        Log.wTree(")");
     }
 }
 
@@ -979,7 +1238,119 @@ class Expression extends Operand {
  */
 abstract class Operator extends SyntaxUnit {
     Operand secondOp;
+    String operation;
     //Part 1 + 2:
+
+    public static Operator makeNewOperator() {
+        if(isArithmetic(Scanner.curToken)) return new ArithmeticOperator();
+        else return new LogicOperator();
+    }
+
+    public static boolean operandNext() {
+        return Token.isOperand(Scanner.curToken);
+    }
+}
+
+class ArithmeticOperator extends Operator {
+
+    @Override
+    void check(DeclList curDecls) {
+        //Part 2, i guess
+    }
+
+    @Override
+    void genCode(FuncDecl curFunc) {
+        //Part 2, i guess
+    }
+
+    @Override
+    void parse() {
+        Log.enterParser("<operator>");
+        if(Scanner.curToken == addToken) {
+            Scanner.skip(addToken);
+            operation = "+";
+        }
+        else if(Scanner.curToken == subtractToken) {
+            Scanner.skip(subtractToken);
+            operation = "-";
+        }
+        else if(Scanner.curToken == multiplyToken) {
+            Scanner.skip(multiplyToken);
+            operation = "*";
+        }
+        else if(Scanner.curToken == divideToken) {
+            Scanner.skip(divideToken);
+            operation = "/";
+        }
+        Log.leaveParser("</operator>");
+
+        if(operandNext()) {
+            secondOp = Operand.makeNewOperand();
+            secondOp.parse();
+        }
+    }
+
+    @Override
+    void printTree() {
+        Log.wTree(operation + "");
+        if(secondOp != null) {
+            secondOp.printTree();
+        }
+    }
+
+}
+
+class LogicOperator extends Operator {
+    @Override
+    void check(DeclList curDecls) {
+        ////Part 2, i guess
+    }
+
+    @Override
+    void genCode(FuncDecl curFunc) {
+        ////Part 2, i guess
+    }
+
+    @Override
+    void parse() {
+        if(Scanner.curToken == equalToken) {
+            Scanner.skip(equalToken);
+            operation = "==";
+        }
+        if(Scanner.curToken == notEqualToken) {
+            Scanner.skip(notEqualToken);
+            operation = "!=";
+        }
+        if(Scanner.curToken == greaterToken) {
+            Scanner.skip(greaterToken);
+            operation = ">";
+        }
+        if(Scanner.curToken == lessToken) {
+            Scanner.skip(lessToken);
+            operation = "<";
+        }
+        if(Scanner.curToken == greaterEqualToken) {
+            Scanner.skip(greaterEqualToken);
+            operation = ">=";
+        }
+        if(Scanner.curToken == lessEqualToken) {
+            Scanner.skip(lessToken);
+            operation = "<=" ;
+        }
+
+        if(operandNext()) {
+            secondOp = Operand.makeNewOperand();
+            secondOp.parse();
+        }
+    }
+
+    @Override
+    void printTree() {
+        Log.wTree(operation + "");
+        if(secondOp != null) {
+            secondOp.printTree();
+        }
+    }
 }
 
 
@@ -991,6 +1362,26 @@ abstract class Operator extends SyntaxUnit {
  */
 abstract class Operand extends SyntaxUnit {
     Operator nextOperator = null;
+
+    public static Operand makeNewOperand() {
+        if(Scanner.curToken == numberToken) {
+            return new Number(Scanner.curNum);
+        }
+        else if(Scanner.curToken == nameToken && Scanner.nextToken == leftParToken) {
+            return new FunctionCall(Scanner.curName);
+        }
+        else if(Scanner.curToken == nameToken) {
+            return new Variable(Scanner.curName);
+        }
+        else if(Scanner.curToken == leftParToken) {
+            return new InternalExpression();
+        }
+        return null;
+    }
+
+    public static boolean operatorNext() {
+        return Token.isArithmetic(Scanner.curToken) || Token.isLogic(Scanner.curToken);
+    }
 }
 
 
@@ -999,6 +1390,13 @@ abstract class Operand extends SyntaxUnit {
  */
 class FunctionCall extends Operand {
     //Part 1 + 2:
+    ExprList functionParameters;
+    String functionName;
+
+    FunctionCall(String name) {
+        functionName = name;
+        functionParameters = new ExprList();
+    }
 
     @Override
     void check(DeclList curDecls) {
@@ -1014,12 +1412,26 @@ class FunctionCall extends Operand {
 
     @Override
     void parse() {
-        //TODO:
+        Log.enterParser("<function call>");
+        Scanner.skip(nameToken);
+        Scanner.skip(leftParToken);
+        functionParameters.parse();
+        Scanner.skip(rightParToken);
+        Log.leaveParser("</function call>");
+        if(operatorNext()) {
+            nextOperator = Operator.makeNewOperator();
+            nextOperator.parse();
+        }
     }
 
     @Override
     void printTree() {
-        //TODO:
+        Log.wTree(functionName + "(");
+        functionParameters.printTree();
+        Log.wTree(")");
+         if(nextOperator != null) {
+            nextOperator.printTree();
+        }
     }
 
     //Part 1 + 2:
@@ -1031,6 +1443,10 @@ class FunctionCall extends Operand {
  */
 class Number extends Operand {
     int numVal;
+
+    Number(int val) {
+        numVal = val;
+    }
 
     @Override
     void check(DeclList curDecls) {
@@ -1045,12 +1461,21 @@ class Number extends Operand {
 
     @Override
     void parse() {
-        //TODO:
+        Log.enterParser("<number>");
+        Scanner.skip(numberToken);
+        Log.leaveParser("</number");
+        if(operatorNext()) {
+            nextOperator = Operator.makeNewOperator();
+            nextOperator.parse();
+        }
     }
 
     @Override
     void printTree() {
         Log.wTree("" + numVal);
+        if(nextOperator != null) {
+            nextOperator.printTree();
+        }
     }
 }
 
@@ -1063,6 +1488,10 @@ class Variable extends Operand {
     String varName;
     VarDecl declRef = null;
     Expression index = null;
+
+    Variable(String name) {
+        varName = name;
+    }
 
     @Override
     void check(DeclList curDecls) {
@@ -1086,11 +1515,30 @@ class Variable extends Operand {
     @Override
     void parse() {
         Log.enterParser("<variable>");
-        //TODO:
+        Scanner.skip(nameToken);
+        if(Scanner.curToken == leftBracketToken) {
+            Scanner.skip(leftBracketToken);
+            index = new Expression();
+            index.parse();
+            Scanner.skip(rightBracketToken);
+        }
+        Log.leaveParser("</variable>");
+        if(operatorNext()) {
+            nextOperator = Operator.makeNewOperator();
+            nextOperator.parse();
+        }
     }
 
     @Override
     void printTree() {
-        //TODO:
+        Log.wTree(varName);
+        if(index != null) {
+            Log.wTree("[");
+            index.printTree();
+            Log.wTree("]");
+        }
+        if(nextOperator != null) {
+            nextOperator.printTree();
+        }
     }
 }

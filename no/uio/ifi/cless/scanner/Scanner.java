@@ -105,6 +105,7 @@ public class Scanner {
         else if(word.compareTo("else") == 0) nextNextToken = elseToken;
         else if(word.compareTo("while") == 0) nextNextToken = whileToken;
         else if(word.compareTo("return") == 0) nextNextToken = returnToken;
+        else if(word.compareTo("for") == 0) nextNextToken = forToken;
         else {
             nextNextToken = nameToken;
             nextNextName = word;

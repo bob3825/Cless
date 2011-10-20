@@ -23,4 +23,12 @@ public enum Token {
         //Assuming everything else counts as an operator
         return !(t == numberToken || t == nameToken || t == leftParToken);
     }
+
+    public static boolean isArithmetic(Token t) {
+        return t == addToken || t == subtractToken || t == multiplyToken || t == divideToken;
+    }
+
+    public static boolean isLogic(Token t) {
+        return t == equalToken || t == notEqualToken || t == greaterToken || t == lessToken || t == greaterEqualToken || t == lessEqualToken;
+    }
 }
