@@ -140,7 +140,10 @@ public class Scanner {
     private static boolean comment() {
         if (CharGenerator.nextC == '*') {
             //Reads until it finds the end of the comments
-            while (CharGenerator.curC != '*' || CharGenerator.nextC != '/') {
+            while ((CharGenerator.curC != '*' || CharGenerator.nextC != '/')) {
+                if (!CharGenerator.isMoreToRead()) {
+                    Error.error(CharGenerator.curLineNum(),"Reached end of file before end of long comment");
+                }
                 CharGenerator.readNext();
             }
             //ReadNext twice to get rid of the two last comments

@@ -1461,7 +1461,7 @@ class Number extends Operand {
     void parse() {
         Log.enterParser("<number>");
         Scanner.skip(numberToken);
-        Log.leaveParser("</number");
+        Log.leaveParser("</number>");
         if(operatorNext()) {
             nextOperator = Operator.makeNewOperator();
             nextOperator.parse();
