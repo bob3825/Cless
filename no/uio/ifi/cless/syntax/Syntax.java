@@ -12,6 +12,7 @@ import no.uio.ifi.cless.log.Log;
 import no.uio.ifi.cless.scanner.Scanner;
 import no.uio.ifi.cless.scanner.Token;
 
+import javax.lang.model.type.DeclaredType;
 import java.sql.SQLOutput;
 
 import static no.uio.ifi.cless.scanner.Token.*;
@@ -28,6 +29,7 @@ public class Syntax {
         Scanner.readNext();
         Scanner.readNext();
         Scanner.readNext();
+        populateLibrary();
     }
 
     public static void finish() {
@@ -53,6 +55,26 @@ public class Syntax {
 
     public static void printProgram() {
         program.printTree();
+    }
+
+    //Adding the library functions list
+    public static void populateLibrary() {
+        library = new GlobalDeclList();
+        LibFuncDecl libFunction = new LibFuncDecl("getchar", 0);
+        library.addDecl(libFunction);
+
+        libFunction = new LibFuncDecl("getint", 0);
+        library.addDecl(libFunction);
+
+        libFunction = new LibFuncDecl("exit",1);
+        library.addDecl(libFunction);
+
+        libFunction = new LibFuncDecl("putchar",1);
+        library.addDecl(libFunction);
+
+        libFunction = new LibFuncDecl("putint",1);
+        library.addDecl(libFunction);
+
     }
 }
 
@@ -94,7 +116,7 @@ class Program extends SyntaxUnit {
 
         if (!CLess.noLink) {
             // Check that 'main' has been declared properly:
-            //-- Must be changed in part 2:
+            //TODO
         }
     }
 
@@ -159,7 +181,11 @@ abstract class DeclList extends SyntaxUnit {
         }
         else {
             Declaration curDecl = firstDecl;
+            if(curDecl.name.compareTo(d.name) == 0) Error.error(d.lineNum,d.name + " has already been declared in current scope");
             while (curDecl.nextDecl != null) {
+                if (curDecl.name.compareTo(d.name) == 0) {
+                    Error.error(d.lineNum, d.name + " has already been declared in current scope");
+                }
                 curDecl = curDecl.nextDecl;
             }
             curDecl.nextDecl = d;
@@ -178,7 +204,13 @@ abstract class DeclList extends SyntaxUnit {
     }
 
     Declaration findDecl(String name, SyntaxUnit usedIn) {
-        //-- Must be changed in part 2:
+        Declaration curDecl = firstDecl;
+        while (curDecl != null) {
+            if (curDecl.name.compareTo(name) == 0) {
+                return curDecl;
+            }
+            curDecl = curDecl.nextDecl;
+        }
         return null;
     }
 }
@@ -191,7 +223,7 @@ abstract class DeclList extends SyntaxUnit {
 class GlobalDeclList extends DeclList {
     @Override
     void genCode(FuncDecl curFunc) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
@@ -230,7 +262,7 @@ class GlobalDeclList extends DeclList {
 class LocalDeclList extends DeclList {
     @Override
     void genCode(FuncDecl curFunc) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
@@ -251,7 +283,7 @@ class LocalDeclList extends DeclList {
 class ParamDeclList extends DeclList {
     @Override
     void genCode(FuncDecl curFunc) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
@@ -367,7 +399,7 @@ abstract class VarDecl extends Declaration {
         Log.wTreeLn(";");
     }
 
-    //Part 1 + 2:
+    //TODO
 }
 
 
@@ -406,7 +438,7 @@ class GlobalArrayDecl extends VarDecl {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
@@ -440,12 +472,12 @@ class GlobalSimpleVarDecl extends VarDecl {
 
     @Override
     void check(DeclList curDecls) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
     void checkWhetherArray(SyntaxUnit use) {
-        //-- Must be changed in part 2:
+        Syntax.error(use, name + " is a variable and no array");
     }
 
     @Override
@@ -455,7 +487,7 @@ class GlobalSimpleVarDecl extends VarDecl {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
@@ -481,28 +513,27 @@ class LocalArrayDecl extends VarDecl {
 
     @Override
     void check(DeclList curDecls) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
     void checkWhetherArray(SyntaxUnit use) {
-        //-- Must be changed in part 2:
+        /* OK */
     }
 
     @Override
     void checkWhetherSimpleVar(SyntaxUnit use) {
-        //-- Must be changed in part 2:
+        Syntax.error(use, name + " is an array and no simple variable!");
     }
 
     @Override
     int dataSize() {
-        //-- Must be changed in part 2:
-        return 0;
+        return numElems * 4;
     }
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
@@ -536,22 +567,22 @@ class LocalSimpleVarDecl extends VarDecl {
 
     @Override
     void check(DeclList curDecls) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
     void checkWhetherArray(SyntaxUnit use) {
-        //-- Must be changed in part 2:
+        Syntax.error(use, name + " is a variable and no array");
     }
 
     @Override
     void checkWhetherSimpleVar(SyntaxUnit use) {
-        //-- Must be changed in part 2:
+        /* OK */
     }
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
@@ -577,22 +608,22 @@ class ParamDecl extends VarDecl {
 
     @Override
     void check(DeclList curDecls) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
     void checkWhetherArray(SyntaxUnit use) {
-        //-- Must be changed in part 2:
+        Syntax.error(use, name + " is a parameter and no array!");
     }
 
     @Override
     void checkWhetherSimpleVar(SyntaxUnit use) {
-        //-- Must be changed in part 2:
+        /* OK */
     }
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
@@ -613,7 +644,7 @@ class ParamDecl extends VarDecl {
  * A <func decl>
  */
 class FuncDecl extends Declaration {
-    //-- Must be changed in part 2
+    //TODO
     ParamDeclList parameters;
     LocalDeclList localVariables;
     StatmList funcBody;
@@ -630,22 +661,22 @@ class FuncDecl extends Declaration {
 
     @Override
     void check(DeclList curDecls) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
     void checkWhetherArray(SyntaxUnit use) {
-        //-- Must be changed in part 2:
+        Syntax.error(use, name + " is a function and no array!");
     }
 
     @Override
     void checkWhetherFunction(int nParamsUsed, SyntaxUnit use) {
-        //-- Must be changed in part 2:
+        /* OK */
     }
 
     @Override
     void checkWhetherSimpleVar(SyntaxUnit use) {
-        //-- Must be changed in part 2:
+        Syntax.error(use, name + " is a function and no simple variable!");
     }
 
     @Override
@@ -658,7 +689,7 @@ class FuncDecl extends Declaration {
         Code.genInstr("", ".globl", assemblerName, "");
         Code.genInstr(assemblerName, "pushl", "%ebp", "Start function " + name);
         Code.genInstr("", "movl", "%esp,%ebp", "");
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
@@ -689,6 +720,20 @@ class FuncDecl extends Declaration {
     }
 }
 
+class LibFuncDecl extends FuncDecl {
+    int parameters;
+
+    LibFuncDecl(String n, int parameters) {
+        super(n);
+        this.parameters = parameters;
+    }
+
+    @Override
+    void genCode(FuncDecl curFunc) {
+        super.genCode(curFunc);
+    }
+}
+
 
 
 
@@ -700,12 +745,12 @@ class StatmList extends SyntaxUnit {
 
     @Override
     void check(DeclList curDecls) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
@@ -797,12 +842,12 @@ class CallStatm extends Statement {
     }
     @Override
     void check(DeclList curDecls) {
-        //Part 2, i guess
+        //TODO
     }
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //Part 2, i guess
+        //TODO
     }
 
     @Override
@@ -823,16 +868,16 @@ class CallStatm extends Statement {
 * An <empty statm>.
 */
 class EmptyStatm extends Statement {
-    //Part 1 + 2:
+    //TODO
 
     @Override
     void check(DeclList curDecls) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
@@ -850,7 +895,7 @@ class EmptyStatm extends Statement {
 /*
 * A <for-statm>.
 */
-//Part 1 + 2:
+//TODO
 
 class ForStatm extends Statement {
     ForAssignStatm start;
@@ -860,12 +905,12 @@ class ForStatm extends Statement {
 
     @Override
     void check(DeclList curDecls) {
-        //Part 2, i guess
+        //TODO
     }
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //Part 2, i guess
+        //TODO
     }
 
     @Override
@@ -874,11 +919,9 @@ class ForStatm extends Statement {
         Scanner.skip(leftParToken);
         start = new ForAssignStatm(Scanner.curName);
         start.parse();
-        System.out.println("1");
         Scanner.skip(semicolonToken);
         test = new Expression();
         test.parse();
-        System.out.println("2");
         Scanner.skip(semicolonToken);
         step = new ForAssignStatm(Scanner.curName);
         step.parse();
@@ -909,7 +952,7 @@ class IfStatm extends Statement {
     Expression test;
     StatmList ifpart;
     StatmList elsepart = null;
-    //Part 1 + 2:
+    //TODO
 
     IfStatm() {
         test = new Expression();
@@ -918,12 +961,12 @@ class IfStatm extends Statement {
 
     @Override
     void check(DeclList curDecls) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
@@ -964,7 +1007,7 @@ class IfStatm extends Statement {
 /*
  * A <return-statm>.
  */
-//Part 1 + 2:
+//TODO
 class ReturnStatm extends Statement {
     Expression returnExpression;
 
@@ -973,12 +1016,12 @@ class ReturnStatm extends Statement {
     }
     @Override
     void check(DeclList curDecls) {
-        //Part 2, i guess
+        //TODO
     }
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //Part 2, i guess
+        //TODO
     }
 
     @Override
@@ -1062,12 +1105,12 @@ class AssignStatm extends Statement {
     }
     @Override
     void check(DeclList curDecls) {
-        //Part 2, i guess
+        //TODO
     }
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //Part 2, i guess
+        //TODO
     }
 
     @Override
@@ -1117,12 +1160,12 @@ class ExprList extends SyntaxUnit {
 
     @Override
     void check(DeclList curDecls) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
@@ -1183,12 +1226,12 @@ class Expression extends Operand {
 
     @Override
     void check(DeclList curDecls) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
@@ -1237,7 +1280,7 @@ class InternalExpression extends Expression {
 abstract class Operator extends SyntaxUnit {
     Operand secondOp;
     String operation;
-    //Part 1 + 2:
+    //TODO
 
     public static Operator makeNewOperator() {
         if(isArithmetic(Scanner.curToken)) return new ArithmeticOperator();
@@ -1253,12 +1296,12 @@ class ArithmeticOperator extends Operator {
 
     @Override
     void check(DeclList curDecls) {
-        //Part 2, i guess
+        //TODO
     }
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //Part 2, i guess
+        //TODO
     }
 
     @Override
@@ -1301,12 +1344,12 @@ class ArithmeticOperator extends Operator {
 class LogicOperator extends Operator {
     @Override
     void check(DeclList curDecls) {
-        ////Part 2, i guess
+        ////TODO
     }
 
     @Override
     void genCode(FuncDecl curFunc) {
-        ////Part 2, i guess
+        ////TODO
     }
 
     @Override
@@ -1352,7 +1395,7 @@ class LogicOperator extends Operator {
 }
 
 
-//Part 1 + 2:
+//TODO
 
 
 /*
@@ -1387,7 +1430,7 @@ abstract class Operand extends SyntaxUnit {
  * A <function call>.
  */
 class FunctionCall extends Operand {
-    //Part 1 + 2:
+    //TODO
     ExprList functionParameters;
     String functionName;
 
@@ -1398,14 +1441,14 @@ class FunctionCall extends Operand {
 
     @Override
     void check(DeclList curDecls) {
-        //-- Must be changed in part 2:
+        //TODO
 
         if (nextOperator != null) nextOperator.check(curDecls);
     }
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override
@@ -1432,7 +1475,7 @@ class FunctionCall extends Operand {
         }
     }
 
-    //Part 1 + 2:
+    //TODO
 }
 
 
@@ -1448,7 +1491,7 @@ class Number extends Operand {
 
     @Override
     void check(DeclList curDecls) {
-        //-- Must be changed in part 2:
+        //TODO
         if (nextOperator != null) nextOperator.check(curDecls);
     }
 
@@ -1507,7 +1550,7 @@ class Variable extends Operand {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //-- Must be changed in part 2:
+        //TODO
     }
 
     @Override

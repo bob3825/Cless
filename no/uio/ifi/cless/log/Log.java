@@ -85,8 +85,7 @@ public class Log {
      * @param line    The actual line
      */
     public static void noteSourceLine(int lineNum, String line) {
-        if (!doLogParser && !doLogScanner)
-        System.out.println("NN");
+        if (!doLogParser && !doLogScanner) return;
         String sourceLine = "   " + lineNum + ": " + line;
         writeLogLine(sourceLine);
     }
@@ -107,8 +106,9 @@ public class Log {
     }
 
     public static void noteBinding(String name, int lineNum, int useLineNum) {
-        if (!doLogBinding) ;
-        //-- Must be changed in part 2:
+        if(doLogBinding) {
+            writeLogLine("Binding Line " + useLineNum + ": " + name + " refers to declaration in line " + lineNum);
+        }
     }
 
 
