@@ -66,7 +66,8 @@ public class Scanner {
                     nextNextToken = numberToken;
                     nextNextNum = (int)CharGenerator.curC;
                     CharGenerator.readNext();
-                    CharGenerator.readNext();
+                    if(CharGenerator.curC == '\'') CharGenerator.readNext();
+                    else Error.error("C< error: Illegal character constant!");
                 }
                 else if(CharGenerator.curC != '\n' && CharGenerator.curC != ' ') isWord(CharGenerator.curC);
                 else CharGenerator.readNext();
@@ -140,7 +141,7 @@ public class Scanner {
     private static boolean comment() {
         if (CharGenerator.nextC == '*') {
             //Reads until it finds the end of the comments
-            while ((CharGenerator.curC != '*' || CharGenerator.nextC != '/')) {
+            while (!(CharGenerator.curC == '*' && CharGenerator.nextC == '/')) {
                 if (!CharGenerator.isMoreToRead()) {
                     Error.error(CharGenerator.curLineNum(),"Reached end of file before end of long comment");
                 }

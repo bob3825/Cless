@@ -1,5 +1,4 @@
 CLess.jar: ALWAYS
-	touch no/uio/ifi/cless/cless/CLess.java
 	(cd no/uio/ifi/cless/cless; make)
 	jar cmf manifest.txt CLess.jar no/uio/ifi/cless/*/*.class
 
