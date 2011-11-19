@@ -116,7 +116,16 @@ class Program extends SyntaxUnit {
 
         if (!CLess.noLink) {
             // Check that 'main' has been declared properly:
-            //TODO
+            Declaration curDecl = progDecls.firstDecl;
+            while(curDecl != null) {
+                if (curDecl.name.compareTo("main") == 0) {
+                    curDecl.checkWhetherFunction(0,this);
+                    Log.noteBindingMain(curDecl.lineNum);
+                    return;
+                }
+                curDecl = curDecl.nextDecl;
+            }
+            Error.error("Could not find a main function");
         }
     }
 
@@ -157,6 +166,7 @@ abstract class DeclList extends SyntaxUnit {
 
     @Override
     void check(DeclList curDecls) {
+        printDecls();
         outerScope = curDecls;
 
         Declaration dx = firstDecl;
@@ -204,14 +214,41 @@ abstract class DeclList extends SyntaxUnit {
     }
 
     Declaration findDecl(String name, SyntaxUnit usedIn) {
+        DeclList curScope = this;
+        while(curScope != null) {
+            Declaration curDecl = curScope.firstDecl;
+            while (curDecl != null) {
+                if (curDecl.name.compareTo(name) == 0 && curDecl.visible == true) {
+                    if (curDecl instanceof LibFuncDecl) Log.noteBindingLibrary(name,usedIn.lineNum);
+                    else Log.noteBinding(name,curDecl.lineNum,usedIn.lineNum);
+                    return curDecl;
+                }
+                curDecl = curDecl.nextDecl;
+            }
+            curScope = curScope.outerScope;
+        }
+        Error.error(usedIn.lineNum,name + " has not been properly declared");
+        return null;
+
+
+    }
+
+     void printDecls() {
         Declaration curDecl = firstDecl;
         while (curDecl != null) {
-            if (curDecl.name.compareTo(name) == 0) {
-                return curDecl;
-            }
+            System.out.println(curDecl.name + ": " + curDecl.lineNum);
             curDecl = curDecl.nextDecl;
         }
-        return null;
+    }
+
+    int size() {
+        Declaration curDecl = firstDecl;
+        int size = 0;
+        while (curDecl != null) {
+            size++;
+            curDecl = curDecl.nextDecl;
+        }
+        return size;
     }
 }
 
@@ -260,6 +297,7 @@ class GlobalDeclList extends DeclList {
  * (This class is not mentioned in the syntax diagrams.)
  */
 class LocalDeclList extends DeclList {
+
     @Override
     void genCode(FuncDecl curFunc) {
         //TODO
@@ -472,7 +510,7 @@ class GlobalSimpleVarDecl extends VarDecl {
 
     @Override
     void check(DeclList curDecls) {
-        //TODO
+        visible = true;
     }
 
     @Override
@@ -513,7 +551,9 @@ class LocalArrayDecl extends VarDecl {
 
     @Override
     void check(DeclList curDecls) {
-        //TODO
+        visible = true;
+        if (numElems < 0)
+            Syntax.error(this, "Arrays cannot have negative size!");
     }
 
     @Override
@@ -567,7 +607,7 @@ class LocalSimpleVarDecl extends VarDecl {
 
     @Override
     void check(DeclList curDecls) {
-        //TODO
+        visible = true;
     }
 
     @Override
@@ -608,7 +648,7 @@ class ParamDecl extends VarDecl {
 
     @Override
     void check(DeclList curDecls) {
-        //TODO
+        visible = true;
     }
 
     @Override
@@ -661,7 +701,10 @@ class FuncDecl extends Declaration {
 
     @Override
     void check(DeclList curDecls) {
-        //TODO
+        visible = true;
+        parameters.check(curDecls);
+        localVariables.check(parameters);
+        funcBody.check(localVariables);
     }
 
     @Override
@@ -672,6 +715,9 @@ class FuncDecl extends Declaration {
     @Override
     void checkWhetherFunction(int nParamsUsed, SyntaxUnit use) {
         /* OK */
+        if (!(parameters.size() == nParamsUsed)) {
+            Error.error(use.lineNum, name + " should have " + nParamsUsed + " parameters but the number used was " + parameters.size());
+        }
     }
 
     @Override
@@ -721,11 +767,13 @@ class FuncDecl extends Declaration {
 }
 
 class LibFuncDecl extends FuncDecl {
-    int parameters;
-
     LibFuncDecl(String n, int parameters) {
         super(n);
-        this.parameters = parameters;
+        visible = true;
+        if(parameters == 1) {
+            this.parameters = new ParamDeclList();
+            this.parameters.addDecl(new ParamDecl("x"));
+        }
     }
 
     @Override
@@ -745,7 +793,11 @@ class StatmList extends SyntaxUnit {
 
     @Override
     void check(DeclList curDecls) {
-        //TODO
+        Statement curStatm = firstStatm;
+        while (curStatm != null) {
+            curStatm.check(curDecls);
+            curStatm = curStatm.nextStatm;
+        }
     }
 
     @Override
@@ -842,7 +894,7 @@ class CallStatm extends Statement {
     }
     @Override
     void check(DeclList curDecls) {
-        //TODO
+        call.check(curDecls);
     }
 
     @Override
@@ -872,7 +924,7 @@ class EmptyStatm extends Statement {
 
     @Override
     void check(DeclList curDecls) {
-        //TODO
+        //Nothing to check
     }
 
     @Override
@@ -905,7 +957,10 @@ class ForStatm extends Statement {
 
     @Override
     void check(DeclList curDecls) {
-        //TODO
+        start.check(curDecls);
+        test.check(curDecls);
+        step.check(curDecls);
+        body.check(curDecls);
     }
 
     @Override
@@ -961,7 +1016,9 @@ class IfStatm extends Statement {
 
     @Override
     void check(DeclList curDecls) {
-        //TODO
+        test.check(curDecls);
+        ifpart.check(curDecls);
+        elsepart.check(curDecls);
     }
 
     @Override
@@ -1016,7 +1073,7 @@ class ReturnStatm extends Statement {
     }
     @Override
     void check(DeclList curDecls) {
-        //TODO
+        returnExpression.check(curDecls);
     }
 
     @Override
@@ -1105,7 +1162,8 @@ class AssignStatm extends Statement {
     }
     @Override
     void check(DeclList curDecls) {
-        //TODO
+        var.check(curDecls);
+        value.check(curDecls);
     }
 
     @Override
@@ -1160,7 +1218,11 @@ class ExprList extends SyntaxUnit {
 
     @Override
     void check(DeclList curDecls) {
-        //TODO
+        Expression curExpr = firstExpr;
+        while(curExpr != null) {
+            curExpr.check(curDecls);
+            curExpr = curExpr.nextExpr;
+        }
     }
 
     @Override
@@ -1226,7 +1288,7 @@ class Expression extends Operand {
 
     @Override
     void check(DeclList curDecls) {
-        //TODO
+        firstOp.check(curDecls);
     }
 
     @Override
@@ -1280,7 +1342,11 @@ class InternalExpression extends Expression {
 abstract class Operator extends SyntaxUnit {
     Operand secondOp;
     String operation;
-    //TODO
+
+    @Override
+    void check(DeclList curDecls) {
+        secondOp.check(curDecls);
+    }
 
     public static Operator makeNewOperator() {
         if(isArithmetic(Scanner.curToken)) return new ArithmeticOperator();
@@ -1293,12 +1359,6 @@ abstract class Operator extends SyntaxUnit {
 }
 
 class ArithmeticOperator extends Operator {
-
-    @Override
-    void check(DeclList curDecls) {
-        //TODO
-    }
-
     @Override
     void genCode(FuncDecl curFunc) {
         //TODO
@@ -1342,11 +1402,6 @@ class ArithmeticOperator extends Operator {
 }
 
 class LogicOperator extends Operator {
-    @Override
-    void check(DeclList curDecls) {
-        ////TODO
-    }
-
     @Override
     void genCode(FuncDecl curFunc) {
         ////TODO
@@ -1441,7 +1496,9 @@ class FunctionCall extends Operand {
 
     @Override
     void check(DeclList curDecls) {
-        //TODO
+        Declaration d = curDecls.findDecl(functionName,this);
+        d.checkWhetherFunction(functionParameters.nExprs(),this);
+        functionParameters.check(curDecls);
 
         if (nextOperator != null) nextOperator.check(curDecls);
     }
@@ -1491,7 +1548,7 @@ class Number extends Operand {
 
     @Override
     void check(DeclList curDecls) {
-        //TODO
+        //Number doesnt need to be checked
         if (nextOperator != null) nextOperator.check(curDecls);
     }
 

@@ -110,6 +110,16 @@ public class Log {
             writeLogLine("Binding Line " + useLineNum + ": " + name + " refers to declaration in line " + lineNum);
         }
     }
+    public static void noteBindingLibrary(String name, int useLineNum) {
+        if(doLogBinding) {
+            writeLogLine("Binding Line " + useLineNum + ": " + name + " refers to declaration in library");
+        }
+    }
+    public static void noteBindingMain(int useLineNum) {
+        if(doLogBinding) {
+            writeLogLine("Binding: main refers to declaration in line " + useLineNum);
+        }
+    }
 
 
     public static void wTree(String s) {
