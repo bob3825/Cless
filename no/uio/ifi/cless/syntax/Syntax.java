@@ -1085,6 +1085,16 @@ class ForStatm extends Statement {
     void genCode(FuncDecl curFunc) {
         String startlabel = Code.getLocalLabel();
         String stopLabel = Code.getLocalLabel();
+        start.genCode(curFunc);
+        Code.genInstr(startlabel,"","","Start for-statement");
+        test.genCode(curFunc);
+        Code.genInstr("","cmpl","$0,%eax","");
+        Code.genInstr("","je",stopLabel,"");
+        body.genCode(curFunc);
+        step.genCode(curFunc);
+        Code.genInstr("","jmp",startlabel,"");
+        Code.genInstr(stopLabel,"","","End for-statement");
+
     }
 
     @Override
@@ -1599,10 +1609,10 @@ class LogicOperator extends Operator {
             Code.genInstr("","setne","%al","Test !=");
         }
         if (operation.compareTo("<=") == 0) {
-            Code.genInstr("","setle","%al","<=");
+            Code.genInstr("","setle","%al","Test <=");
         }
         if (operation.compareTo(">=") == 0) {
-            Code.genInstr("","setge","%al",">=");
+            Code.genInstr("","setge","%al","Test >=");
         }
         Code.genInstr("","movzbl","%al,%eax","");
     }
@@ -1630,7 +1640,7 @@ class LogicOperator extends Operator {
             operation = ">=";
         }
         if(Scanner.curToken == lessEqualToken) {
-            Scanner.skip(lessToken);
+            Scanner.skip(lessEqualToken);
             operation = "<=" ;
         }
 
