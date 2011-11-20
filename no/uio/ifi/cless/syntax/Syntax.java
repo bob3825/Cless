@@ -260,7 +260,11 @@ abstract class DeclList extends SyntaxUnit {
 class GlobalDeclList extends DeclList {
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        Declaration curDecl = firstDecl;
+        while (curDecl != null) {
+            curDecl.genCode(null);
+            curDecl = curDecl.nextDecl;
+        }
     }
 
     @Override
@@ -297,18 +301,36 @@ class GlobalDeclList extends DeclList {
  * (This class is not mentioned in the syntax diagrams.)
  */
 class LocalDeclList extends DeclList {
+    int offset;
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        offset = 0;
+        Declaration curDecl = firstDecl;
+        while (curDecl != null) {
+            offset = offset + curDecl.dataSize();
+            curDecl.offset = offset;
+            curDecl = curDecl.nextDecl;
+        }
+        if (offset > 0) {
+            Code.genInstr("","subl","$"+offset+",%esp","Get " + offset + " bytes of local space");
+        }
+
     }
 
     @Override
     void parse() {
         while(Scanner.curToken == intToken) {
-            LocalSimpleVarDecl var = new LocalSimpleVarDecl(Scanner.nextName);
-            var.parse();
-            addDecl(var);
+            if (Scanner.nextNextToken == leftBracketToken){
+                LocalArrayDecl var = new LocalArrayDecl(Scanner.nextName);
+                var.parse();
+                addDecl(var);
+            }
+            else {
+                LocalSimpleVarDecl var = new LocalSimpleVarDecl(Scanner.nextName);
+                var.parse();
+                addDecl(var);
+            }
         }
     }
 }
@@ -321,14 +343,16 @@ class LocalDeclList extends DeclList {
 class ParamDeclList extends DeclList {
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        //No code neccesary
     }
 
     @Override
     void parse() {
+        int params = 0;
         while(Scanner.curToken != rightParToken) {
             ParamDecl p = new ParamDecl(Scanner.nextName);
             p.parse();
+            p.paramNum = params++;
             addDecl(p);
             if(Scanner.curToken == commaToken) {
                 Scanner.skip(commaToken);
@@ -359,6 +383,8 @@ abstract class Declaration extends SyntaxUnit {
     String name, assemblerName;
     boolean visible = false;
     Declaration nextDecl = null;
+    //offset for computation of place in stack for local variables
+    int offset;
 
     Declaration(String n) {
         name = n;
@@ -437,7 +463,9 @@ abstract class VarDecl extends Declaration {
         Log.wTreeLn(";");
     }
 
-    //TODO
+    abstract void genStoreArray();
+
+    abstract void genStore();
 }
 
 
@@ -476,7 +504,19 @@ class GlobalArrayDecl extends VarDecl {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        Code.genVar(assemblerName,true,dataSize(),"int " + name + "[" + numElems + "];");
+    }
+
+    @Override
+    void genStoreArray() {
+        Code.genInstr("","leal",assemblerName+",%edx", name+"[...] =");
+        Code.genInstr("","popl","%ecx","");
+        Code.genInstr("","movl","%eax,(%edx,%ecx,4)","");
+    }
+
+    @Override
+    void genStore() {
+        Error.error(name + "is not a simple variable");
     }
 
     @Override
@@ -525,7 +565,17 @@ class GlobalSimpleVarDecl extends VarDecl {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        Code.genVar(assemblerName,true,4, "int " + name + ";");
+    }
+
+    @Override
+    void genStoreArray() {
+        Error.error(name + "is not a array");
+    }
+
+    @Override
+    void genStore() {
+        Code.genInstr("","movl","%eax,"+assemblerName, name+" =");
     }
 
     @Override
@@ -574,6 +624,18 @@ class LocalArrayDecl extends VarDecl {
     @Override
     void genCode(FuncDecl curFunc) {
         //TODO
+    }
+
+    @Override
+    void genStoreArray() {
+        Code.genInstr("","leal","-"+ offset +"(ebp),%edx", name+"[...] =");
+        Code.genInstr("","popl","%ecx","");
+        Code.genInstr("","movl","%eax,(%edx,%ecx,4)","");
+    }
+
+    @Override
+    void genStore() {
+        Error.error(name + "is not a simple variable");
     }
 
     @Override
@@ -626,6 +688,16 @@ class LocalSimpleVarDecl extends VarDecl {
     }
 
     @Override
+    void genStoreArray() {
+        Error.error(name + "is not a array");
+    }
+
+    @Override
+    void genStore() {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
     void parse() {
         Log.enterParser("<var decl>");
         Scanner.readNext();
@@ -663,7 +735,17 @@ class ParamDecl extends VarDecl {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        //No code neccessary
+    }
+
+    @Override
+    void genStoreArray() {
+        Error.error("Arrays can't be parameters");
+    }
+
+    @Override
+    void genStore() {
+        Code.genInstr("","movl","%eax," + (8+4*paramNum) + "(%ebp)",name + " =");
     }
 
     @Override
@@ -684,7 +766,6 @@ class ParamDecl extends VarDecl {
  * A <func decl>
  */
 class FuncDecl extends Declaration {
-    //TODO
     ParamDeclList parameters;
     LocalDeclList localVariables;
     StatmList funcBody;
@@ -735,7 +816,14 @@ class FuncDecl extends Declaration {
         Code.genInstr("", ".globl", assemblerName, "");
         Code.genInstr(assemblerName, "pushl", "%ebp", "Start function " + name);
         Code.genInstr("", "movl", "%esp,%ebp", "");
-        //TODO
+        parameters.genCode(this);
+        localVariables.genCode(this);
+        funcBody.genCode(this);
+        Code.genInstr("exit$" + assemblerName, "", "", "");
+        if(localVariables.offset > 0)
+            Code.genInstr("","addl","$" + localVariables.offset + ", %esp","Release local data space");
+        Code.genInstr("","popl","%ebp","");
+        Code.genInstr("","ret","","End function " + name);
     }
 
     @Override
@@ -802,7 +890,12 @@ class StatmList extends SyntaxUnit {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        Statement curStatm = firstStatm;
+        while (curStatm != null) {
+            curStatm.genCode(curFunc);
+            curStatm = curStatm.nextStatm;
+        }
+
     }
 
     @Override
@@ -920,7 +1013,6 @@ class CallStatm extends Statement {
 * An <empty statm>.
 */
 class EmptyStatm extends Statement {
-    //TODO
 
     @Override
     void check(DeclList curDecls) {
@@ -947,8 +1039,6 @@ class EmptyStatm extends Statement {
 /*
 * A <for-statm>.
 */
-//TODO
-
 class ForStatm extends Statement {
     ForAssignStatm start;
     Expression test;
@@ -1007,8 +1097,6 @@ class IfStatm extends Statement {
     Expression test;
     StatmList ifpart;
     StatmList elsepart = null;
-    //TODO
-
     IfStatm() {
         test = new Expression();
         ifpart = new StatmList();
@@ -1064,7 +1152,6 @@ class IfStatm extends Statement {
 /*
  * A <return-statm>.
  */
-//TODO
 class ReturnStatm extends Statement {
     Expression returnExpression;
 
@@ -1168,7 +1255,13 @@ class AssignStatm extends Statement {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        if (var.declRef instanceof GlobalArrayDecl || var.declRef instanceof LocalArrayDecl) {
+            //TODO
+        }
+        else {
+            value.genCode(curFunc);
+            var.declRef.genStore();
+        }
     }
 
     @Override
@@ -1449,10 +1542,6 @@ class LogicOperator extends Operator {
     }
 }
 
-
-//TODO
-
-
 /*
  * An <operand>
  */
@@ -1531,8 +1620,6 @@ class FunctionCall extends Operand {
             nextOperator.printTree();
         }
     }
-
-    //TODO
 }
 
 
