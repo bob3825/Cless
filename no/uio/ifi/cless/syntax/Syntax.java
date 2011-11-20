@@ -139,6 +139,7 @@ class Program extends SyntaxUnit {
         Log.enterParser("<program>");
         progDecls.parse();
         if (Scanner.curToken != eofToken)
+            System.out.println(Scanner.curName);
             Scanner.expected("Declaration");
 
         Log.leaveParser("</program>");
@@ -1145,22 +1146,35 @@ class IfStatm extends Statement {
     void check(DeclList curDecls) {
         test.check(curDecls);
         ifpart.check(curDecls);
-        elsepart.check(curDecls);
+        if (elsepart != null)
+            elsepart.check(curDecls);
     }
 
     @Override
     void genCode(FuncDecl curFunc) {
-        String ifLabel = Code.getLocalLabel();
-        String elseLabel = Code.getLocalLabel();
-        Code.genInstr("","","","Start if-statement");
-        test.genCode(curFunc);
-        Code.genInstr("","cmpl","$0,%eax","");
-        Code.genInstr("","je",elseLabel,"");
-        ifpart.genCode(curFunc);
-        Code.genInstr("","jmp",ifLabel,"");
-        Code.genInstr(elseLabel,"","","  else-part");
-        elsepart.genCode(curFunc);
-        Code.genInstr(ifLabel,"","","End if-statement");
+        if(elsepart != null) {
+            String ifLabel = Code.getLocalLabel();
+            String elseLabel = Code.getLocalLabel();
+            Code.genInstr("","","","Start if-statement");
+            test.genCode(curFunc);
+            Code.genInstr("","cmpl","$0,%eax","");
+            Code.genInstr("","je",elseLabel,"");
+            ifpart.genCode(curFunc);
+            Code.genInstr("","jmp",ifLabel,"");
+            Code.genInstr(elseLabel,"","","  else-part");
+            elsepart.genCode(curFunc);
+            Code.genInstr(ifLabel,"","","End if-statement");
+        }
+        else {
+            String ifLabel = Code.getLocalLabel();
+            Code.genInstr("", "", "", "Start if-statement");
+            test.genCode(curFunc);
+            Code.genInstr("","cmpl","$0,%eax","");
+            Code.genInstr("", "je", ifLabel, "");
+            ifpart.genCode(curFunc);
+            Code.genInstr(ifLabel, "", "", "End if-statement");
+
+        }
     }
 
     @Override
@@ -1443,6 +1457,7 @@ class Expression extends Operand {
     @Override
     void check(DeclList curDecls) {
         firstOp.check(curDecls);
+        if (nextOperator != null) nextOperator.check(curDecls);
     }
 
     @Override
@@ -1462,7 +1477,8 @@ class Expression extends Operand {
         Log.enterParser("<expression>");
 
         firstOp = Operand.makeNewOperand();
-        firstOp.parse();
+        if(firstOp != null)
+            firstOp.parse();
 
 
 
@@ -1501,6 +1517,11 @@ class InternalExpression extends Expression {
         firstOp.parse();
         Log.leaveParser("</expression>");
         Scanner.skip(rightParToken);
+        if(operatorNext()) {
+            nextOperator = Operator.makeNewOperator();
+            nextOperator.parse();
+        }
+
     }
 
     @Override
@@ -1508,6 +1529,10 @@ class InternalExpression extends Expression {
         Log.wTree("(");
         firstOp.printTree();
         Log.wTree(")");
+        if(nextOperator != null) {
+            nextOperator.printTree();
+        }
+
     }
 }
 
@@ -1818,6 +1843,8 @@ class Variable extends Operand {
         }
         else {
             declRef.genGetVar();
+
+
         }
     }
 

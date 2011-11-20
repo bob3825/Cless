@@ -49,8 +49,13 @@ public class Scanner {
                 //Checks the different possibilities of what the character can be
                 if(isSingleToken(CharGenerator.curC)) CharGenerator.readNext();
                 else if(isTwoToken(CharGenerator.curC)) CharGenerator.readNext();
-                else if(isNumber(CharGenerator.curC)) {
+                else if(isNumber(CharGenerator.curC) || CharGenerator.curC == '-') {
                     //Makes a number of all the string until we find a character that i´snt a number
+                    boolean negative = false;
+                    if (CharGenerator.curC == '-') {
+                        negative = true;
+                        CharGenerator.readNext();
+                    }
                     String number = Character.toString(CharGenerator.curC);
                     CharGenerator.readNext();
                     while (isNumber(CharGenerator.curC)) {
@@ -60,6 +65,7 @@ public class Scanner {
                     //Saves the number and sets nextnexttoken
                     nextNextToken = numberToken;
                     nextNextNum = new Integer(number);
+                    if (negative) nextNextNum = nextNextNum * -1;
                 }
                 else if (CharGenerator.curC == '\'') {
                     CharGenerator.readNext();
@@ -95,7 +101,7 @@ public class Scanner {
     private static void isWord(char c) {
         String word = Character.toString(CharGenerator.curC);
         CharGenerator.readNext();
-        while (isLetterAZ(CharGenerator.curC) || isNumber(CharGenerator.curC)) {
+        while (isLetterAZ(CharGenerator.curC) || isNumber(CharGenerator.curC) || CharGenerator.curC == '_') {
             word = word + Character.toString(CharGenerator.curC);
             CharGenerator.readNext();
         }
@@ -129,7 +135,7 @@ public class Scanner {
             case ',': nextNextToken = commaToken; return true;
             case '*': nextNextToken = multiplyToken; return true;
             case ';': nextNextToken = semicolonToken; return true;
-            case '-': nextNextToken = subtractToken; return true;
+            case '-': nextNextToken = subtractToken; if (isNumber(CharGenerator.nextC)) return false; else return true;
             default: return false;
         }
 
