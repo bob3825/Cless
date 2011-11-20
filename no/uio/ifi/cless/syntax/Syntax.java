@@ -220,7 +220,7 @@ abstract class DeclList extends SyntaxUnit {
         while(curScope != null) {
             Declaration curDecl = curScope.firstDecl;
             while (curDecl != null) {
-                if (curDecl.name.compareTo(name) == 0 && curDecl.visible == true) {
+                if (curDecl.name.compareTo(name) == 0 && curDecl.visible) {
                     if (curDecl instanceof LibFuncDecl) Log.noteBindingLibrary(name,usedIn.lineNum);
                     else Log.noteBinding(name,curDecl.lineNum,usedIn.lineNum);
                     return curDecl;
@@ -427,7 +427,7 @@ abstract class Declaration extends SyntaxUnit {
      *                    (The method will give an error message if the
      *                    function was used with too many or too few parameters.)
      * @param use         From where is the check performed?
-     * @see checkWhetherArray
+     * checkWhetherArray
      */
     abstract void checkWhetherFunction(int nParamsUsed, SyntaxUnit use);
 
@@ -435,7 +435,7 @@ abstract class Declaration extends SyntaxUnit {
      * checkWhetherSimpleVar: Utility method to check whether this
      * Declaration is really a simple variable.
      *
-     * @see checkWhetherArray
+     * checkWhetherArray
      */
     abstract void checkWhetherSimpleVar(SyntaxUnit use);
 }
@@ -885,6 +885,7 @@ class FuncDecl extends Declaration {
     }
 }
 
+//Class made to seperate the library functions from the other functions
 class LibFuncDecl extends FuncDecl {
     LibFuncDecl(String n, int parameters) {
         super(n);
@@ -1510,6 +1511,7 @@ class Expression extends Operand {
     }
 }
 
+//Separate class for handling expressions inside another expression
 class InternalExpression extends Expression {
     @Override
     void parse() {
