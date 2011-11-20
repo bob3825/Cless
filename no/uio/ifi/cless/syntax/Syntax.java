@@ -166,7 +166,6 @@ abstract class DeclList extends SyntaxUnit {
 
     @Override
     void check(DeclList curDecls) {
-        printDecls();
         outerScope = curDecls;
 
         Declaration dx = firstDecl;
@@ -313,7 +312,7 @@ class LocalDeclList extends DeclList {
             curDecl = curDecl.nextDecl;
         }
         if (offset > 0) {
-            Code.genInstr("","subl","$"+offset+",%esp","Get " + offset + " bytes of local space");
+            Code.genInstr("","subl","$"+offset+",%esp","Get " + offset + " bytes local data space");
         }
 
     }
@@ -466,6 +465,8 @@ abstract class VarDecl extends Declaration {
     abstract void genStoreArray();
 
     abstract void genStore();
+
+    abstract void genGetVar();
 }
 
 
@@ -517,6 +518,12 @@ class GlobalArrayDecl extends VarDecl {
     @Override
     void genStore() {
         Error.error(name + "is not a simple variable");
+    }
+
+    @Override
+    void genGetVar() {
+        Code.genInstr("","leal",assemblerName+",%edx", name+"[...]");
+        Code.genInstr("","movl","(%edx,%eax,4),%eax","");
     }
 
     @Override
@@ -579,6 +586,11 @@ class GlobalSimpleVarDecl extends VarDecl {
     }
 
     @Override
+    void genGetVar() {
+        Code.genInstr("","movl",assemblerName + ",%eax",name);
+    }
+
+    @Override
     void parse() {
         Log.enterParser("<var decl>");
         Scanner.readNext();
@@ -623,12 +635,12 @@ class LocalArrayDecl extends VarDecl {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        //Replaced by genStoreArray and genGetVar
     }
 
     @Override
     void genStoreArray() {
-        Code.genInstr("","leal","-"+ offset +"(ebp),%edx", name+"[...] =");
+        Code.genInstr("","leal","-"+ offset +"(%ebp),%edx", name+"[...] =");
         Code.genInstr("","popl","%ecx","");
         Code.genInstr("","movl","%eax,(%edx,%ecx,4)","");
     }
@@ -636,6 +648,12 @@ class LocalArrayDecl extends VarDecl {
     @Override
     void genStore() {
         Error.error(name + "is not a simple variable");
+    }
+
+    @Override
+    void genGetVar() {
+        Code.genInstr("","leal","-"+ offset +"(%ebp),%edx", name+"[...]");
+        Code.genInstr("","movl","(%edx,%eax,4),%eax","");
     }
 
     @Override
@@ -683,8 +701,13 @@ class LocalSimpleVarDecl extends VarDecl {
     }
 
     @Override
+    void genGetVar() {
+        Code.genInstr("","movl","-" + offset + "(%ebp),%eax",name);
+    }
+
+    @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        //Repleaced by genStore and genGetVar
     }
 
     @Override
@@ -694,7 +717,7 @@ class LocalSimpleVarDecl extends VarDecl {
 
     @Override
     void genStore() {
-        //To change body of implemented methods use File | Settings | File Templates.
+        Code.genInstr("","movl","%eax,-" + offset + "(%ebp)",name + " =");
     }
 
     @Override
@@ -746,6 +769,11 @@ class ParamDecl extends VarDecl {
     @Override
     void genStore() {
         Code.genInstr("","movl","%eax," + (8+4*paramNum) + "(%ebp)",name + " =");
+    }
+
+    @Override
+    void genGetVar() {
+        Code.genInstr("","movl",(8+4*paramNum) + "(%ebp),%eax",name);
     }
 
     @Override
@@ -819,9 +847,9 @@ class FuncDecl extends Declaration {
         parameters.genCode(this);
         localVariables.genCode(this);
         funcBody.genCode(this);
-        Code.genInstr("exit$" + assemblerName, "", "", "");
+        Code.genInstr(".exit$" + assemblerName, "", "", "");
         if(localVariables.offset > 0)
-            Code.genInstr("","addl","$" + localVariables.offset + ", %esp","Release local data space");
+            Code.genInstr("","addl","$" + localVariables.offset + ",%esp","Release local data space");
         Code.genInstr("","popl","%ebp","");
         Code.genInstr("","ret","","End function " + name);
     }
@@ -992,7 +1020,7 @@ class CallStatm extends Statement {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        call.genCode(curFunc);
     }
 
     @Override
@@ -1021,7 +1049,7 @@ class EmptyStatm extends Statement {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        //No code to generate
     }
 
     @Override
@@ -1055,7 +1083,8 @@ class ForStatm extends Statement {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        String startlabel = Code.getLocalLabel();
+        String stopLabel = Code.getLocalLabel();
     }
 
     @Override
@@ -1111,7 +1140,17 @@ class IfStatm extends Statement {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        String ifLabel = Code.getLocalLabel();
+        String elseLabel = Code.getLocalLabel();
+        Code.genInstr("","","","Start if-statement");
+        test.genCode(curFunc);
+        Code.genInstr("","cmpl","$0,%eax","");
+        Code.genInstr("","je",elseLabel,"");
+        ifpart.genCode(curFunc);
+        Code.genInstr("","jmp",ifLabel,"");
+        Code.genInstr(elseLabel,"","","  else-part");
+        elsepart.genCode(curFunc);
+        Code.genInstr(ifLabel,"","","End if-statement");
     }
 
     @Override
@@ -1165,7 +1204,8 @@ class ReturnStatm extends Statement {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        returnExpression.genCode(curFunc);
+        Code.genInstr("","jmp",".exit$" + curFunc.name,"return-statement");
     }
 
     @Override
@@ -1255,8 +1295,11 @@ class AssignStatm extends Statement {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        if (var.declRef instanceof GlobalArrayDecl || var.declRef instanceof LocalArrayDecl) {
-            //TODO
+        if (var.index != null) {
+            var.index.genCode(curFunc);
+            Code.genInstr("","pushl","%eax","");
+            value.genCode(curFunc);
+            var.declRef.genStoreArray();
         }
         else {
             value.genCode(curFunc);
@@ -1320,7 +1363,15 @@ class ExprList extends SyntaxUnit {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        if(firstExpr != null) {
+            firstExpr.pushParameters(1);
+        }
+    }
+
+    void popParameters() {
+        if(firstExpr != null) {
+            firstExpr.popParameters(1);
+        }
     }
 
     @Override
@@ -1386,7 +1437,14 @@ class Expression extends Operand {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        firstOp.genCode(curFunc);
+        Operator opr = firstOp.nextOperator;
+        while(opr != null) {
+            Code.genInstr("", "pushl", "%eax", "");
+            opr.secondOp.genCode(curFunc);
+            opr.genCode(curFunc);
+            opr = opr.secondOp.nextOperator;
+        }
     }
 
     @Override
@@ -1406,6 +1464,21 @@ class Expression extends Operand {
         //Log.wTree("(");
         firstOp.printTree();
         //Log.wTree(")");
+    }
+
+    void pushParameters(int nr) {
+        if (nextExpr != null) {
+            nextExpr.pushParameters((nr + 1));
+        }
+        genCode(null);
+        Code.genInstr("","pushl","%eax","Push parameter #" + nr);
+    }
+
+    void popParameters(int nr) {
+        Code.genInstr("","popl","%ecx","Pop parameter #" + nr);
+        if (nextExpr != null) {
+            nextExpr.popParameters((nr + 1));
+        }
     }
 }
 
@@ -1454,7 +1527,21 @@ abstract class Operator extends SyntaxUnit {
 class ArithmeticOperator extends Operator {
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        Code.genInstr("","movl","%eax,%ecx","");
+        Code.genInstr("","popl","%eax","");
+        if (operation.compareTo("+") == 0) {
+            Code.genInstr("","addl","%ecx,%eax","Compute +");
+        }
+        else if (operation.compareTo("-") == 0) {
+            Code.genInstr("","subl","%ecx,%eax","Compute -");
+        }
+        else if (operation.compareTo("*") == 0) {
+            Code.genInstr("","imull","%ecx,%eax","Compute *");
+        }
+        else if (operation.compareTo("/") == 0) {
+            Code.genInstr("","cdq","","");
+            Code.genInstr("","idivl","%ecx","Compute /");
+        }
     }
 
     @Override
@@ -1497,7 +1584,27 @@ class ArithmeticOperator extends Operator {
 class LogicOperator extends Operator {
     @Override
     void genCode(FuncDecl curFunc) {
-        ////TODO
+        Code.genInstr("","popl","%ecx","");
+        Code.genInstr("","cmpl","%eax,%ecx","");
+        if (operation.compareTo("==") == 0) {
+            Code.genInstr("","sete","%al","Test ==");
+        }
+        if (operation.compareTo("<") == 0) {
+            Code.genInstr("","setl","%al","Test <");
+        }
+        if (operation.compareTo(">") == 0) {
+            Code.genInstr("","setg","%al","Test >");
+        }
+        if (operation.compareTo("!=") == 0) {
+            Code.genInstr("","setne","%al","Test !=");
+        }
+        if (operation.compareTo("<=") == 0) {
+            Code.genInstr("","setle","%al","<=");
+        }
+        if (operation.compareTo(">=") == 0) {
+            Code.genInstr("","setge","%al",">=");
+        }
+        Code.genInstr("","movzbl","%al,%eax","");
     }
 
     @Override
@@ -1574,7 +1681,6 @@ abstract class Operand extends SyntaxUnit {
  * A <function call>.
  */
 class FunctionCall extends Operand {
-    //TODO
     ExprList functionParameters;
     String functionName;
 
@@ -1594,7 +1700,9 @@ class FunctionCall extends Operand {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        functionParameters.genCode(curFunc);
+        Code.genInstr("","call",functionName,"Call " + functionName);
+        functionParameters.popParameters();
     }
 
     @Override
@@ -1694,7 +1802,13 @@ class Variable extends Operand {
 
     @Override
     void genCode(FuncDecl curFunc) {
-        //TODO
+        if (index != null) {
+            index.genCode(curFunc);
+            declRef.genGetVar();
+        }
+        else {
+            declRef.genGetVar();
+        }
     }
 
     @Override
