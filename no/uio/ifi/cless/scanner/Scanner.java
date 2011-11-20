@@ -47,7 +47,8 @@ public class Scanner {
             if(!CharGenerator.isMoreToRead()) lastTwo++;
             if (lastTwo < 2) {
                 //Checks the different possibilities of what the character can be
-                if(isSingleToken(CharGenerator.curC)) CharGenerator.readNext();
+                if(CharGenerator.curC == '/' && CharGenerator.nextC == '*') comment();
+                else if(isSingleToken(CharGenerator.curC)) CharGenerator.readNext();
                 else if(isTwoToken(CharGenerator.curC)) CharGenerator.readNext();
                 else if(isNumber(CharGenerator.curC) || CharGenerator.curC == '-') {
                     //Makes a number of all the string until we find a character that i´snt a number
@@ -131,7 +132,7 @@ public class Scanner {
             case '{': nextNextToken = leftCurlToken; return true;
             case '}': nextNextToken = rightCurlToken; return true;
             case '+': nextNextToken = addToken; return true;
-            case '/': nextNextToken = divideToken; return comment();
+            case '/': nextNextToken = divideToken; return true;
             case ',': nextNextToken = commaToken; return true;
             case '*': nextNextToken = multiplyToken; return true;
             case ';': nextNextToken = semicolonToken; return true;

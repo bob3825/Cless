@@ -138,9 +138,11 @@ class Program extends SyntaxUnit {
     void parse() {
         Log.enterParser("<program>");
         progDecls.parse();
-        if (Scanner.curToken != eofToken)
+        if (Scanner.curToken != eofToken) {
             System.out.println(Scanner.curName);
+            System.out.println(Scanner.nextToken);
             Scanner.expected("Declaration");
+        }
 
         Log.leaveParser("</program>");
     }
