@@ -1,3 +1,0 @@
--Made a tiny change to the makefile to touch the main Cless file, had som trouble with compiling the when there was no change in Cless.java
--The multiline comment handling is a little jerry rigged since i only caught that it was missing in the last pass on the code
-Ne
